@@ -6,30 +6,32 @@ logging.basicConfig(level=logging.INFO, handlers=[RichHandler()])
 
 
 def af_callback(config_file, file):
-    from .af import af_command
+    from ..api.af_step import AFStep
 
-    af_command(config_file)
+    step = AFStep(config_file)
+    step.run()
 
 
 def loft_callback(config_file, file):
-    from .loft import loft_command
+    from ..api.loft_step import LoftStep
 
-    loft_command(config_file)
+    step = LoftStep(config_file)
+    step.run()
 
 
 def run_callback(steps, config_file):
-    from .af import af_command
-    from .loft import loft_command
+    from ..api.af_step import AFStep
+    from ..api.loft_step import LoftStep
 
     if not steps:
         raise ValueError("At least one step must be provided")
-    step_map = {
-        "af": af_command,
-        "loft": loft_command,
+    step_instances = {
+        "af": AFStep(config_file),
+        "loft": LoftStep(config_file),
     }
     for step in steps:
-        if step in step_map:
-            step_map[step](config_file)
+        if step in step_instances:
+            step_instances[step].run()
         else:
             raise ValueError(f"Unknown step: {step}")
 
