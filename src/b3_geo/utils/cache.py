@@ -7,9 +7,9 @@ from b3_geo.utils.interpolation import build_sections_poly
 def save_blade_sections(blade: "Blade", filepath: str):
     """Save blade sections to VTP with planform data."""
     points = blade.get_sections().reshape(-1, 3)
-    sections_poly = build_sections_poly(points, blade.np_chordwise, blade.np_spanwise)
-    sections_poly.field_data["np_spanwise"] = [blade.np_spanwise]
-    sections_poly.field_data["np_chordwise"] = [blade.np_chordwise]
+    grid = build_sections_poly(points, blade.np_chordwise, blade.np_spanwise)
+    grid.field_data["np_spanwise"] = [blade.np_spanwise]
+    grid.field_data["np_chordwise"] = [blade.np_chordwise]
     # Add point_data for planform parameters
     for k in [
         "rel_span",
@@ -26,8 +26,20 @@ def save_blade_sections(blade: "Blade", filepath: str):
             if hasattr(blade, k)
             else blade.get_planform_array(blade.rel_span)[k]
         )
-        sections_poly.point_data[k] = np.repeat(val, blade.np_chordwise)
-    sections_poly.save(filepath)
+        grid.point_data[k] = np.repeat(val, blade.np_chordwise)
+    # Convert to PolyData for VTP
+    poly = pv.PolyData()
+    poly.points = points
+    lines = []
+    for i in range(blade.np_spanwise):
+        line = [blade.np_chordwise] + list(
+            range(i * blade.np_chordwise, (i + 1) * blade.np_chordwise)
+        )
+        lines.append(line)
+    poly.lines = lines
+    poly.field_data = grid.field_data
+    poly.point_data = grid.point_data
+    poly.save(filepath)
 
 
 def load_blade_sections(
