@@ -12,7 +12,7 @@ def test_process_loft(tmp_path):
     # Create config data
     config_data = {
         "general": {"workdir": "."},
-        "geometry": {"planform": {"pre_rotation": 0.0}},
+        "geometry": {"planform": {"pre_rotation": -90.0}},
         "airfoils": [{"path": "airfoil.dat", "name": "test", "thickness": 0.2}],
     }
     config_file = tmp_path / "config.yml"
@@ -48,13 +48,20 @@ def test_process_loft(tmp_path):
     # Check outputs
     assert (workdir / "lm1.vtp").exists()
 
+    # Test pre-rotation application: twist should be -90.0
+
+    planform_data = np.load(pln_workdir / "planform.npz")
+    rel_span = planform_data["rel_span"]
+    twist_values = planform_data["twist"] + (-90.0)  # pre_rotation applied
+    assert np.allclose(twist_values, -90.0)
+
 
 def test_loft_command(tmp_path):
     """Test loft command."""
     # Create config data
     config_data = {
         "general": {"workdir": "."},
-        "geometry": {"planform": {"pre_rotation": 0.0}},
+        "geometry": {"planform": {"pre_rotation": -90.0}},
         "airfoils": [{"path": "airfoil.dat", "name": "test", "thickness": 0.2}],
     }
     config_file = tmp_path / "config.yml"
@@ -89,3 +96,9 @@ def test_loft_command(tmp_path):
 
     # Check outputs
     assert (workdir / "lm1.vtp").exists()
+
+    # Test pre-rotation application: twist should be -90.0
+    planform_data = np.load(pln_workdir / "planform.npz")
+    rel_span = planform_data["rel_span"]
+    twist_values = planform_data["twist"] + (-90.0)  # pre_rotation applied
+    assert np.allclose(twist_values, -90.0)
