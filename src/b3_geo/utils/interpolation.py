@@ -1,11 +1,12 @@
 import numpy as np
 from scipy.interpolate import CubicSpline, PchipInterpolator
 from typing import List, Tuple
+import pyvista as pv
 
 
 def load_airfoil(path: str) -> np.ndarray:
     """Load airfoil data from file."""
-    return np.loadtxt(path, skiprows=1)
+    return np.loadtxt(path)
 
 
 def interpolate_airfoil(data: np.ndarray, n_points: int) -> np.ndarray:
@@ -43,3 +44,13 @@ def pchip_interpolate(points: List[Tuple[float, float]], x: np.ndarray) -> np.nd
     xs, ys = zip(*points)
     interpolator = PchipInterpolator(xs, ys)
     return interpolator(x)
+
+
+def build_sections_poly(
+    points: np.ndarray, np_chordwise: int, np_spanwise: int
+) -> pv.StructuredGrid:
+    """Build structured grid for blade sections."""
+    grid = pv.StructuredGrid()
+    grid.points = points
+    grid.dimensions = (np_chordwise, np_spanwise, 1)
+    return grid

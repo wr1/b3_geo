@@ -16,8 +16,10 @@ dependencies = [
     "pyvista",
     "pydantic",
     "pyyaml",
-    "rich-click",
+    "treeparse",
     "rich",
+    "pytest",
+    "pytest-cov",
 ]
 
 [project.scripts]

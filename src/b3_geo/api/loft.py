@@ -29,8 +29,10 @@ def process_loft(config_path: str, workdir: Optional[Path] = None) -> np.ndarray
         )
     workdir.mkdir(exist_ok=True, parents=True)
     geometry_data = config_data.get("geometry", {})
-    aero_data = config_data.get("aero", {})
-    airfoils_data = aero_data.get("airfoils", [])
+    planform_data_config = geometry_data.get("planform", {})
+    pre_rotation = planform_data_config.get("pre_rotation", 0.0)
+    logger.info(f"Pre-rotation: {pre_rotation}")
+    airfoils_data = config_data.get("airfoils", [])
     logger.info(f"Airfoils data: {airfoils_data}")
     # Load planform from b3_pln
     pln_workdir = (
@@ -48,7 +50,6 @@ def process_loft(config_path: str, workdir: Optional[Path] = None) -> np.ndarray
     twist = list(zip(rel_span, planform_data["twist"]))
     dx = list(zip(rel_span, planform_data["dx"]))
     dy = list(zip(rel_span, planform_data["dy"]))
-    pre_rotation = 0.0  # Assuming default, or load from config if needed
     npchord = len(rel_span)  # Assuming npchord is npspan
     npspan = len(rel_span)
     planform = Planform(
@@ -66,7 +67,9 @@ def process_loft(config_path: str, workdir: Optional[Path] = None) -> np.ndarray
         planform=planform,
         airfoils=[
             Airfoil(
-                path=str(config_dir / af["file"]), name=af["name"], thickness=af["key"]
+                path=str(config_dir / af["path"]),
+                name=af["name"],
+                thickness=af["thickness"],
             )
             for af in airfoils_data
         ],

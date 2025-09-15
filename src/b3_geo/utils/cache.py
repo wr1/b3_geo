@@ -1,11 +1,10 @@
 import pyvista as pv
 import numpy as np
 from typing import Dict, Tuple
-from b3_geo.core.blade import Blade
 from b3_geo.utils.interpolation import build_sections_poly
 
 
-def save_blade_sections(blade: Blade, filepath: str):
+def save_blade_sections(blade: "Blade", filepath: str):
     """Save blade sections to VTP with planform data."""
     points = blade.get_sections().reshape(-1, 3)
     sections_poly = build_sections_poly(points, blade.np_chordwise, blade.np_spanwise)
