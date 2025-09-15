@@ -21,13 +21,18 @@ def process_loft(config_path: str, workdir: Optional[Path] = None) -> np.ndarray
     start_time = time.time()
     logger.info("Starting loft step")
     config_data = yaml.safe_load(Path(config_path).read_text())
+    config_dir = Path(config_path).parent
     if workdir is None:
-        workdir = Path(config_data.get("general", {}).get("workdir", ".")) / "b3_geo"
+        workdir = (
+            config_dir / config_data.get("general", {}).get("workdir", ".") / "b3_geo"
+        )
     workdir.mkdir(exist_ok=True, parents=True)
     geometry_data = config_data.get("geometry", {})
     airfoils_data = config_data.get("airfoils", [])
     # Load planform from b3_pln
-    pln_workdir = Path(config_data.get("general", {}).get("workdir", ".")) / "b3_pln"
+    pln_workdir = (
+        config_dir / config_data.get("general", {}).get("workdir", ".") / "b3_pln"
+    )
     planform_npz = pln_workdir / "planform.npz"
     if not planform_npz.exists():
         raise FileNotFoundError(f"Planform file not found: {planform_npz}")
@@ -56,7 +61,14 @@ def process_loft(config_path: str, workdir: Optional[Path] = None) -> np.ndarray
     )
     blade_config = BladeConfig(
         planform=planform,
-        airfoils=[Airfoil(**af) for af in airfoils_data],
+        airfoils=[
+            Airfoil(
+                path=str(config_dir / af["path"]),
+                name=af["name"],
+                thickness=af["thickness"],
+            )
+            for af in airfoils_data
+        ],
     )
     blade = Blade(blade_config)
     sections = create_lm1(blade)
