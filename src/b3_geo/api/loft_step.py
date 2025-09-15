@@ -9,6 +9,16 @@ class LoftStep(Statesman):
     dependent_sections = ["geometry", "airfoils"]
     output_files = ["b3_geo/lm1.vtp"]
 
+    def run(self, force=False):
+        self.logger.info("Starting run check.")
+        if force or self.needs_run():
+            self.logger.info("Step needs to run. Executing...")
+            self._execute()
+            self.logger.info("Execution completed.")
+            self.save_state()
+        else:
+            self.logger.info("Step does not need to run.")
+
     def _execute(self):
         from .loft import process_loft
 
