@@ -9,15 +9,18 @@ class AFStep(Statesman):
     dependent_sections = ["airfoils", "geometry"]
     output_files = ["b3_geo/airfoils.png", "b3_geo/airfoils.npz"]
 
+    def __init__(self, config_path):
+        super().__init__(config_path)
+        self.force = False
+
     def run(self, force=False):
-        self.logger.info("Starting run check.")
-        if force or self.needs_run():
-            self.logger.info("Step needs to run. Executing...")
-            self._execute()
-            self.logger.info("Execution completed.")
-            self.save_state()
-        else:
-            self.logger.info("Step does not need to run.")
+        self.force = force
+        super().run()
+
+    def needs_run(self):
+        if self.force:
+            return True
+        return super().needs_run()
 
     def _execute(self):
         from .af import process_af
