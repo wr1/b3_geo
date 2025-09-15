@@ -26,19 +26,31 @@ def process_af(config_path: str, workdir: Path = None) -> Dict[str, Dict]:
     start_time = time.time()
     logger.info("Starting af step")
     config_data = yaml.safe_load(Path(config_path).read_text())
+    config_dir = Path(config_path).parent
     if workdir is None:
-        workdir = Path(config_data.get("general", {}).get("workdir", ".")) / "b3_geo"
+        workdir = (
+            config_dir / config_data.get("general", {}).get("workdir", ".") / "b3_geo"
+        )
     workdir.mkdir(exist_ok=True, parents=True)
     geometry_data = config_data.get("geometry", {})
     # Load planform from b3_pln
-    pln_workdir = Path(config_data.get("general", {}).get("workdir", ".")) / "b3_pln"
+    pln_workdir = (
+        config_dir / config_data.get("general", {}).get("workdir", ".") / "b3_pln"
+    )
     planform_npz = pln_workdir / "planform.npz"
     if not planform_npz.exists():
         raise FileNotFoundError(f"Planform file not found: {planform_npz}")
     planform_data = np.load(planform_npz)
     npchord = planform_data["chord"].shape[0]  # Assuming npchord is the length
     airfoils_data = config_data.get("airfoils", [])
-    airfoils = [Airfoil(**af) for af in airfoils_data]
+    airfoils = [
+        Airfoil(
+            path=str(config_dir / af["path"]),
+            name=af["name"],
+            thickness=af["thickness"],
+        )
+        for af in airfoils_data
+    ]
     airfoils_dict = resample_airfoils(airfoils, npchord)
     plot_file = workdir / "airfoils.png"
     plot_airfoils(airfoils_dict, npchord, str(plot_file))
