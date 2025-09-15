@@ -6,7 +6,7 @@ def test_blade_init(tmp_path):
     """Test Blade initialization."""
     # Create dummy airfoil file
     airfoil_file = tmp_path / "airfoil.dat"
-    airfoil_file.write_text("0.0 0.0\n0.5 0.1\n1.0 0.0\n")
+    airfoil_file.write_text("# header\n0.0 0.0\n0.5 0.1\n1.0 0.0\n")
 
     # Create planform
     planform = Planform(
