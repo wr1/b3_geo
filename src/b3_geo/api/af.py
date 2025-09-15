@@ -43,14 +43,11 @@ def process_af(config_path: str, workdir: Path = None) -> Dict[str, Dict]:
         raise FileNotFoundError(f"Planform file not found: {planform_npz}")
     planform_data = np.load(planform_npz)
     npchord = planform_data["chord"].shape[0]  # Assuming npchord is the length
-    airfoils_data = config_data.get("airfoil", [])
+    aero_data = config_data.get("aero", {})
+    airfoils_data = aero_data.get("airfoils", [])
     logger.info(f"Airfoils data: {airfoils_data}")
     airfoils = [
-        Airfoil(
-            path=str(config_dir / af["path"]),
-            name=af["name"],
-            thickness=af["thickness"],
-        )
+        Airfoil(path=str(config_dir / af["file"]), name=af["name"], thickness=af["key"])
         for af in airfoils_data
     ]
     airfoils_dict = resample_airfoils(airfoils, npchord)
