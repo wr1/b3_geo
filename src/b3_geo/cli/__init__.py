@@ -5,16 +5,18 @@ from rich.logging import RichHandler
 logging.basicConfig(level=logging.INFO, handlers=[RichHandler(show_time=False)])
 
 
-def af_callback(config_file, file):
+def af_callback(config_file, file, force=False):
     from ..api.af_step import AFStep
+
     step = AFStep(config_file)
-    step.run()
+    step.run(force=force)
 
 
-def loft_callback(config_file, file):
+def loft_callback(config_file, file, force=False):
     from ..api.loft_step import LoftStep
+
     step = LoftStep(config_file)
-    step.run()
+    step.run(force=force)
 
 
 def run_callback(config_file, steps):
@@ -57,6 +59,11 @@ af_cmd = command(
             arg_type=str,
             help="Output file path.",
         ),
+        option(
+            flags=["--force", "-F"],
+            arg_type=bool,
+            help="Force rerun despite statesman checks.",
+        ),
     ],
 )
 app.commands.append(af_cmd)
@@ -73,6 +80,11 @@ loft_cmd = command(
             flags=["--file", "-f"],
             arg_type=str,
             help="Output file path.",
+        ),
+        option(
+            flags=["--force", "-F"],
+            arg_type=bool,
+            help="Force rerun despite statesman checks.",
         ),
     ],
 )
