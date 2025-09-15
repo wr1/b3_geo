@@ -2,7 +2,7 @@ from treeparse import cli, group, command, argument, option
 import logging
 from rich.logging import RichHandler
 
-logging.basicConfig(level=logging.INFO, handlers=[RichHandler()])
+logging.basicConfig(level=logging.INFO, handlers=[RichHandler(show_time=False)])
 
 
 def af_callback(config_file, file):
