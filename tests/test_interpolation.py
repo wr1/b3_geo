@@ -11,7 +11,7 @@ from b3_geo.utils.interpolation import (
 def test_load_airfoil(tmp_path):
     """Test loading airfoil data from file."""
     airfoil_file = tmp_path / "airfoil.dat"
-    airfoil_file.write_text("0.0 0.0\n0.5 0.1\n1.0 0.0\n")
+    airfoil_file.write_text("# header\n0.0 0.0\n0.5 0.1\n1.0 0.0\n")
     data = load_airfoil(str(airfoil_file))
     assert data.shape == (3, 2)
     assert data[0, 0] == 0.0
