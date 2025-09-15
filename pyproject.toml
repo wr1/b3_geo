@@ -20,6 +20,7 @@ dependencies = [
     "rich",
     "pytest",
     "pytest-cov",
+    "statesman",
 ]
 
 [project.scripts]
