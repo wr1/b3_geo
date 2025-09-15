@@ -22,13 +22,15 @@ def process_loft(config_path: str, workdir: Optional[Path] = None) -> np.ndarray
     logger.info("Starting loft step")
     config_data = yaml.safe_load(Path(config_path).read_text())
     config_dir = Path(config_path).parent
+    logger.info(f"Config data keys: {list(config_data.keys())}")
     if workdir is None:
         workdir = (
             config_dir / config_data.get("general", {}).get("workdir", ".") / "b3_geo"
         )
     workdir.mkdir(exist_ok=True, parents=True)
     geometry_data = config_data.get("geometry", {})
-    airfoils_data = config_data.get("airfoils", [])
+    airfoils_data = config_data.get("airfoil", [])
+    logger.info(f"Airfoils data: {airfoils_data}")
     # Load planform from b3_pln
     pln_workdir = (
         config_dir / config_data.get("general", {}).get("workdir", ".") / "b3_pln"
