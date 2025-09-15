@@ -31,7 +31,7 @@ def test_save_blade_sections(tmp_path):
 
     blade = Blade(blade_config)
 
-    filepath = str(tmp_path / "test.vtk")
+    filepath = str(tmp_path / "test.vtp")
     save_blade_sections(blade, filepath)
 
-    assert (tmp_path / "test.vtk").exists()
+    assert (tmp_path / "test.vtp").exists()
