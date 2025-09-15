@@ -46,7 +46,7 @@ def test_process_loft(tmp_path):
     process_loft(str(config_file))
 
     # Check outputs
-    assert (workdir / "lm1.vtk").exists()
+    assert (workdir / "lm1.vtp").exists()
 
 
 def test_loft_command(tmp_path):
@@ -88,4 +88,4 @@ def test_loft_command(tmp_path):
     loft_command(str(config_file))
 
     # Check outputs
-    assert (workdir / "lm1.vtk").exists()
+    assert (workdir / "lm1.vtp").exists()
