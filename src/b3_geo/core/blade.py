@@ -27,6 +27,8 @@ class Blade:
             self.airfoils_data[af.name] = {"data": data, "thickness": af.thickness}
         # Precompute interpolation functions for airfoils
         sorted_af = sorted(self.airfoils_data.values(), key=lambda d: d["thickness"])
+        if len(sorted_af) == 0:
+            raise ValueError("No airfoils provided")
         self.t_sorted = np.array([d["thickness"] for d in sorted_af])
         interp_data = np.array(
             [interpolate_airfoil(d["data"], self.np_chordwise) for d in sorted_af]
