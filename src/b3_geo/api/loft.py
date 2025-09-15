@@ -29,7 +29,8 @@ def process_loft(config_path: str, workdir: Optional[Path] = None) -> np.ndarray
         )
     workdir.mkdir(exist_ok=True, parents=True)
     geometry_data = config_data.get("geometry", {})
-    airfoils_data = config_data.get("airfoil", [])
+    aero_data = config_data.get("aero", {})
+    airfoils_data = aero_data.get("airfoils", [])
     logger.info(f"Airfoils data: {airfoils_data}")
     # Load planform from b3_pln
     pln_workdir = (
@@ -65,9 +66,7 @@ def process_loft(config_path: str, workdir: Optional[Path] = None) -> np.ndarray
         planform=planform,
         airfoils=[
             Airfoil(
-                path=str(config_dir / af["path"]),
-                name=af["name"],
-                thickness=af["thickness"],
+                path=str(config_dir / af["file"]), name=af["name"], thickness=af["key"]
             )
             for af in airfoils_data
         ],
