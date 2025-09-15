@@ -27,6 +27,7 @@ def process_af(config_path: str, workdir: Path = None) -> Dict[str, Dict]:
     logger.info("Starting af step")
     config_data = yaml.safe_load(Path(config_path).read_text())
     config_dir = Path(config_path).parent
+    logger.info(f"Config data keys: {list(config_data.keys())}")
     if workdir is None:
         workdir = (
             config_dir / config_data.get("general", {}).get("workdir", ".") / "b3_geo"
@@ -42,7 +43,8 @@ def process_af(config_path: str, workdir: Path = None) -> Dict[str, Dict]:
         raise FileNotFoundError(f"Planform file not found: {planform_npz}")
     planform_data = np.load(planform_npz)
     npchord = planform_data["chord"].shape[0]  # Assuming npchord is the length
-    airfoils_data = config_data.get("airfoils", [])
+    airfoils_data = config_data.get("airfoil", [])
+    logger.info(f"Airfoils data: {airfoils_data}")
     airfoils = [
         Airfoil(
             path=str(config_dir / af["path"]),
