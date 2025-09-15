@@ -1,5 +1,5 @@
 from pathlib import Path
-from statesman.core.base import Statesman
+from statesman import Statesman
 
 
 class AFStep(Statesman):
