@@ -1,5 +1,5 @@
 from pathlib import Path
-from statesman.core.base import Statesman, ManagedFile
+from statesman.core.base import Statesman
 
 
 class LoftStep(Statesman):
@@ -7,9 +7,6 @@ class LoftStep(Statesman):
 
     workdir_key = "general.workdir"
     dependent_sections = ["geometry", "airfoils"]
-    input_files = [
-        ManagedFile(name="b3_geo/airfoils.npz", non_empty=True, newer_than="config")
-    ]
     output_files = ["b3_geo/lm1.vtp"]
 
     def _execute(self):

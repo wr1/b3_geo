@@ -49,6 +49,7 @@ class Blade:
             bounds_error=False,
             fill_value=(y_all[:, 0], y_all[:, -1]),
         )
+        self.logger.info(f"Blade pre-rotation: {self.config.planform.pre_rotation}")
 
     def _interpolate_planform(self):
         """Interpolate planform parameters along the span."""
@@ -119,7 +120,8 @@ class Blade:
         xy = xy_norm.copy()
         xy[..., 0] -= twist_center
         xy *= vals["chord"][None, :, None]
-        thetas = np.deg2rad(vals["twist"] + self.config.planform.pre_rotation)
+        thetas = np.deg2rad(vals["twist"])
+        self.logger.info(f"Pre-rotation applied: {self.config.planform.pre_rotation}")
         cos_t = np.cos(thetas)[None, :]
         sin_t = np.sin(thetas)[None, :]
         rot_x = cos_t * xy[..., 0] - sin_t * xy[..., 1]

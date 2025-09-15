@@ -33,7 +33,6 @@ def process_af(config_path: str, workdir: Path = None) -> Dict[str, Dict]:
             config_dir / config_data.get("general", {}).get("workdir", ".") / "b3_geo"
         )
     workdir.mkdir(exist_ok=True, parents=True)
-    geometry_data = config_data.get("geometry", {})
     # Load planform from b3_pln
     pln_workdir = (
         config_dir / config_data.get("general", {}).get("workdir", ".") / "b3_pln"

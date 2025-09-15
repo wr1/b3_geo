@@ -1,7 +1,10 @@
 import pyvista as pv
 import numpy as np
-from typing import Dict, Tuple
-from b3_geo.utils.interpolation import build_sections_poly
+from typing import Dict, Tuple, TYPE_CHECKING
+from .interpolation import build_sections_poly
+
+if TYPE_CHECKING:
+    from ..core.blade import Blade
 
 
 def save_blade_sections(blade: "Blade", filepath: str):
@@ -32,13 +35,13 @@ def save_blade_sections(blade: "Blade", filepath: str):
     poly.points = points
     lines = []
     for i in range(blade.np_spanwise):
-        line = [blade.np_chordwise] + list(
-            range(i * blade.np_chordwise, (i + 1) * blade.np_chordwise)
-        )
+        line = [blade.np_chordwise] + list(range(i * blade.np_chordwise, (i + 1) * blade.np_chordwise))
         lines.append(line)
     poly.lines = lines
-    poly.field_data = grid.field_data
-    poly.point_data = grid.point_data
+    for k, v in grid.field_data.items():
+        poly.field_data[k] = v
+    for k, v in grid.point_data.items():
+        poly.point_data[k] = v
     poly.save(filepath)
 
 

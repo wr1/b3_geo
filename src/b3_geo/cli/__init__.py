@@ -1,4 +1,4 @@
-from treeparse import cli, group, command, argument, option
+from treeparse import cli, command, argument, option
 import logging
 from rich.logging import RichHandler
 
@@ -7,19 +7,17 @@ logging.basicConfig(level=logging.INFO, handlers=[RichHandler(show_time=False)])
 
 def af_callback(config_file, file):
     from ..api.af_step import AFStep
-
     step = AFStep(config_file)
     step.run()
 
 
 def loft_callback(config_file, file):
     from ..api.loft_step import LoftStep
-
     step = LoftStep(config_file)
     step.run()
 
 
-def run_callback(steps, config_file):
+def run_callback(config_file, steps):
     from ..api.af_step import AFStep
     from ..api.loft_step import LoftStep
 
@@ -85,8 +83,8 @@ run_cmd = command(
     help="Run multiple steps in sequence.",
     callback=run_callback,
     arguments=[
-        argument(name="steps", arg_type=str, nargs=-1, help="Steps to run"),
         argument(name="config_file", arg_type=str, help="Path to config file"),
+        argument(name="steps", arg_type=str, nargs=-1, help="Steps to run"),
     ],
 )
 app.commands.append(run_cmd)

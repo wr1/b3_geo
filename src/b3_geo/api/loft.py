@@ -16,7 +16,9 @@ def create_lm1(blade: Blade) -> np.ndarray:
     return blade.get_sections()
 
 
-def process_loft(config_path: str, workdir: Optional[Path] = None) -> np.ndarray:
+def process_loft(
+    config_path: str, workdir: Optional[Path] = None, output_file: Optional[str] = None
+) -> np.ndarray:
     """Process loft: create blade model and save to VTP."""
     start_time = time.time()
     logger.info("Starting loft step")
@@ -29,8 +31,10 @@ def process_loft(config_path: str, workdir: Optional[Path] = None) -> np.ndarray
         )
     workdir.mkdir(exist_ok=True, parents=True)
     geometry_data = config_data.get("geometry", {})
-    aero_data = config_data.get("aero", {})
-    airfoils_data = aero_data.get("airfoils", [])
+    planform_data_config = geometry_data.get("planform", {})
+    pre_rotation = planform_data_config.get("pre_rotation", 0.0)
+    logger.info(f"Pre-rotation: {pre_rotation}")
+    airfoils_data = config_data.get("airfoils", [])
     logger.info(f"Airfoils data: {airfoils_data}")
     # Load planform from b3_pln
     pln_workdir = (
@@ -45,10 +49,9 @@ def process_loft(config_path: str, workdir: Optional[Path] = None) -> np.ndarray
     z = list(zip(rel_span, planform_data["z"]))
     chord = list(zip(rel_span, planform_data["chord"]))
     thickness = list(zip(rel_span, planform_data["thickness"]))
-    twist = list(zip(rel_span, planform_data["twist"]))
+    twist = list(zip(rel_span, planform_data["twist"] + pre_rotation))
     dx = list(zip(rel_span, planform_data["dx"]))
     dy = list(zip(rel_span, planform_data["dy"]))
-    pre_rotation = 0.0  # Assuming default, or load from config if needed
     npchord = len(rel_span)  # Assuming npchord is npspan
     npspan = len(rel_span)
     planform = Planform(
@@ -58,7 +61,7 @@ def process_loft(config_path: str, workdir: Optional[Path] = None) -> np.ndarray
         twist=twist,
         dx=dx,
         dy=dy,
-        pre_rotation=pre_rotation,
+        pre_rotation=0.0,
         npchord=npchord,
         npspan=npspan,
     )
@@ -66,14 +69,19 @@ def process_loft(config_path: str, workdir: Optional[Path] = None) -> np.ndarray
         planform=planform,
         airfoils=[
             Airfoil(
-                path=str(config_dir / af["file"]), name=af["name"], thickness=af["key"]
+                path=str(config_dir / af["path"]),
+                name=af["name"],
+                thickness=af["thickness"],
             )
             for af in airfoils_data
         ],
     )
     blade = Blade(blade_config)
     sections = create_lm1(blade)
-    vtp_file = workdir / "lm1.vtp"
+    if output_file:
+        vtp_file = Path(output_file)
+    else:
+        vtp_file = workdir / "lm1.vtp"
     save_blade_sections(blade, str(vtp_file))
     logger.info(f"Saved blade sections to {vtp_file}")
     logger.info("Loft step completed")
