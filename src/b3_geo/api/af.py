@@ -53,6 +53,7 @@ def process_af(config_path: str, workdir: Path = None) -> Dict[str, Dict]:
     airfoils_dict = resample_airfoils(airfoils, npchord)
     plot_file = workdir / "airfoils.png"
     plot_airfoils(airfoils_dict, npchord, str(plot_file))
+    logger.info(f"Saved airfoils plot to {plot_file}")
     npz_file = workdir / "airfoils.npz"
     names = list(airfoils_dict.keys())
     thicknesses = [af["thickness"] for af in airfoils_dict.values()]
@@ -63,6 +64,7 @@ def process_af(config_path: str, workdir: Path = None) -> Dict[str, Dict]:
         thicknesses=np.array(thicknesses),
         data=np.array(data),
     )
+    logger.info(f"Saved airfoils data to {npz_file}")
     logger.info("Af step completed")
     elapsed = time.time() - start_time
     logger.info(f"Af step took {elapsed:.2f} seconds")
