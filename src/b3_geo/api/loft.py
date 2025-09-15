@@ -75,6 +75,7 @@ def process_loft(config_path: str, workdir: Optional[Path] = None) -> np.ndarray
     sections = create_lm1(blade)
     vtp_file = workdir / "lm1.vtk"
     save_blade_sections(blade, str(vtp_file))
+    logger.info(f"Saved blade sections to {vtp_file}")
     logger.info("Loft step completed")
     elapsed = time.time() - start_time
     logger.info(f"Loft step took {elapsed:.2f} seconds")
