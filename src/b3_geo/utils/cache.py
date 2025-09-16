@@ -44,6 +44,11 @@ def save_blade_sections(blade: "Blade", filepath: str):
         poly.field_data[k] = v
     for k, v in grid.point_data.items():
         poly.point_data[k] = v
+    # Add t coordinate
+    sections = blade.get_sections()  # (n, chord, 3)
+    chord = blade.get_planform_array(blade.rel_span)["chord"]
+    t = sections[:, :, 0] / chord[:, None]
+    poly.point_data["t"] = t.ravel()
     poly.save(filepath)
 
 
