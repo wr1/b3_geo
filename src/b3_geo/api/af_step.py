@@ -26,5 +26,8 @@ class AFStep(Statesman):
         from .af import process_af
 
         config_dir = Path(self.config_path).parent
-        workdir = config_dir / self.config["general"]["workdir"] / "b3_geo"
+        workdir_str = self.config.get("workdir") or self.config.get("general", {}).get(
+            "workdir", "."
+        )
+        workdir = config_dir / workdir_str / "b3_geo"
         process_af(self.config_path, workdir)
