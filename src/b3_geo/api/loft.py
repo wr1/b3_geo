@@ -16,7 +16,9 @@ def create_lm1(blade: Blade) -> np.ndarray:
     return blade.get_sections()
 
 
-def process_loft(config_path: str, workdir: Optional[Path] = None) -> np.ndarray:
+def process_loft(
+    config_path: str, workdir: Optional[Path] = None, output_file: Optional[str] = None
+) -> np.ndarray:
     """Process loft: create blade model and save to VTP."""
     start_time = time.time()
     logger.info("Starting loft step")
@@ -78,7 +80,10 @@ def process_loft(config_path: str, workdir: Optional[Path] = None) -> np.ndarray
     )
     blade = Blade(blade_config)
     sections = create_lm1(blade)
-    vtp_file = workdir / "lm1.vtp"
+    if output_file:
+        vtp_file = Path(output_file)
+    else:
+        vtp_file = workdir / "lm1.vtp"
     save_blade_sections(blade, str(vtp_file))
     logger.info(f"Saved blade sections to {vtp_file}")
     logger.info("Loft step completed")
