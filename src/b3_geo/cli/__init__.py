@@ -1,6 +1,9 @@
 from treeparse import cli, command, argument, option
 import logging
 from rich.logging import RichHandler
+import yaml
+from pathlib import Path
+import shutil
 
 logging.basicConfig(level=logging.INFO, handlers=[RichHandler(show_time=False)])
 
@@ -19,21 +22,19 @@ def loft_callback(config_file, file, force=False):
     step.run(force=force)
 
 
-def run_callback(config_file, steps):
-    from ..api.af_step import AFStep
-    from ..api.loft_step import LoftStep
-
-    if not steps:
-        raise ValueError("At least one step must be provided")
-    step_instances = {
-        "af": AFStep(config_file),
-        "loft": LoftStep(config_file),
-    }
-    for step in steps:
-        if step in step_instances:
-            step_instances[step].run()
-        else:
-            raise ValueError(f"Unknown step: {step}")
+def clean_callback(config_file):
+    """Remove the b3_geo work directory."""
+    config_data = yaml.safe_load(Path(config_file).read_text())
+    config_dir = Path(config_file).parent
+    workdir_str = config_data.get("workdir") or config_data.get("general", {}).get(
+        "workdir", "."
+    )
+    workdir = config_dir / workdir_str / "b3_geo"
+    if workdir.exists():
+        shutil.rmtree(workdir)
+        print(f"Removed {workdir}")
+    else:
+        print(f"Directory {workdir} does not exist")
 
 
 app = cli(
@@ -90,16 +91,15 @@ loft_cmd = command(
 )
 app.commands.append(loft_cmd)
 
-run_cmd = command(
-    name="run",
-    help="Run multiple steps in sequence.",
-    callback=run_callback,
+clean_cmd = command(
+    name="clean",
+    help="Remove the b3_geo work directory.",
+    callback=clean_callback,
     arguments=[
         argument(name="config_file", arg_type=str, help="Path to config file"),
-        argument(name="steps", arg_type=str, nargs=-1, help="Steps to run"),
     ],
 )
-app.commands.append(run_cmd)
+app.commands.append(clean_cmd)
 
 
 def main():
