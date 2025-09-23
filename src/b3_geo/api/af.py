@@ -34,16 +34,9 @@ def process_af(config_path: str, workdir: Path = None) -> Dict[str, Dict]:
         )
         workdir = config_dir / workdir_str / "b3_geo"
     workdir.mkdir(exist_ok=True, parents=True)
-    # Load planform from b3_pln
-    workdir_str = config_data.get("workdir") or config_data.get("general", {}).get(
-        "workdir", "."
-    )
-    pln_workdir = config_dir / workdir_str / "b3_pln"
-    planform_npz = pln_workdir / "planform.npz"
-    if not planform_npz.exists():
-        raise FileNotFoundError(f"Planform file not found: {planform_npz}")
-    planform_data = np.load(planform_npz)
-    npchord = planform_data["chord"].shape[0]  # Assuming npchord is the length
+    geometry_data = config_data.get("geometry", {})
+    planform_data_config = geometry_data.get("planform", {})
+    npchord = planform_data_config.get("npchord", 200)
     airfoils_data = config_data.get("airfoils", [])
     logger.info(f"Airfoils data: {airfoils_data}")
     airfoils = [
