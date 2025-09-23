@@ -20,7 +20,7 @@ dependencies = [
     "rich",
     "pytest",
     "pytest-cov",
-    "statesman",
+    "statesman @ git+https://github.com/wr1/statesman.git",
 ]
 
 [project.scripts]
