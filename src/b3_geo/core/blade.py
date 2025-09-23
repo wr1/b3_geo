@@ -10,6 +10,7 @@ from b3_geo.utils.interpolation import (
 from scipy.interpolate import interp1d
 from typing import Dict
 import logging
+import matplotlib.pyplot as plt
 
 
 class Blade:
@@ -109,6 +110,20 @@ class Blade:
             return np.column_stack((x, y))
         else:
             return np.dstack((x, y))  # (np_chordwise, n, 2)
+
+    def plot_airfoils(self, thicknesses: np.ndarray, output_file: str):
+        """Plot interpolated airfoils at given thicknesses."""
+        fig, ax = plt.subplots(figsize=(10, 8))
+        for t in thicknesses:
+            xy = self.get_airfoil_xy_norm(t)
+            ax.plot(xy[:, 0], xy[:, 1], label=f"Thickness {t:.2f}")
+        ax.set_title("Interpolated Airfoils")
+        ax.set_xlabel("x/chord")
+        ax.set_ylabel("y/chord")
+        ax.legend()
+        ax.set_aspect("equal")
+        plt.savefig(output_file)
+        plt.close()
 
     def get_sections(self, rels: np.ndarray = None) -> np.ndarray:
         """Compute positioned and rotated airfoil sections at given relative spans."""
