@@ -1,40 +1,15 @@
-from treeparse import cli, command, argument, option
+import sys
 import logging
-from rich.logging import RichHandler
-import yaml
 from pathlib import Path
-import shutil
 
-logging.basicConfig(level=logging.INFO, handlers=[RichHandler(show_time=False)])
+sys.path.append(str(Path(__file__).parent.parent / "src"))
+from treeparse import cli, command, argument, option
 
+logging.basicConfig(level=logging.INFO)
 
-def af_callback(config_file, file, force=False):
-    from ..api.af_step import AFStep
-
-    step = AFStep(config_file)
-    step.run(force=force)
-
-
-def loft_callback(config_file, file, force=False):
-    from ..api.loft_step import LoftStep
-
-    step = LoftStep(config_file)
-    step.run(force=force)
-
-
-def clean_callback(config_file):
-    """Remove the b3_geo work directory."""
-    config_data = yaml.safe_load(Path(config_file).read_text())
-    config_dir = Path(config_file).parent
-    workdir_str = config_data.get("workdir") or config_data.get("general", {}).get(
-        "workdir", "."
-    )
-    workdir = config_dir / workdir_str / "b3_geo"
-    if workdir.exists():
-        shutil.rmtree(workdir)
-        print(f"Removed {workdir}")
-    else:
-        print(f"Directory {workdir} does not exist")
+from .af import af_command
+from .loft import loft_command
+from .clean import clean_command
 
 
 app = cli(
@@ -50,7 +25,7 @@ app = cli(
 af_cmd = command(
     name="af",
     help="Load and resample airfoils, plot and export.",
-    callback=af_callback,
+    callback=af_command,
     arguments=[
         argument(name="config_file", arg_type=str, help="Path to config file"),
     ],
@@ -72,7 +47,7 @@ app.commands.append(af_cmd)
 loft_cmd = command(
     name="loft",
     help="Create LM1 blade model and export to VTP.",
-    callback=loft_callback,
+    callback=loft_command,
     arguments=[
         argument(name="config_file", arg_type=str, help="Path to config file"),
     ],
@@ -94,7 +69,7 @@ app.commands.append(loft_cmd)
 clean_cmd = command(
     name="clean",
     help="Remove the b3_geo work directory.",
-    callback=clean_callback,
+    callback=clean_command,
     arguments=[
         argument(name="config_file", arg_type=str, help="Path to config file"),
     ],
@@ -103,6 +78,13 @@ app.commands.append(clean_cmd)
 
 
 def main():
+    # If only one argument and it's not a command or flag, assume 'loft'
+    if (
+        len(sys.argv) == 2
+        and not sys.argv[1].startswith("-")
+        and sys.argv[1] not in ["af", "loft", "clean"]
+    ):
+        sys.argv.insert(1, "loft")
     app.run()
 
 
