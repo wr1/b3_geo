@@ -91,7 +91,7 @@ class Blade:
 
     def get_planform_array(self, rels: np.ndarray) -> Dict[str, np.ndarray]:
         """Get interpolated planform values for an array of relative spans."""
-        return {
+        result = {
             "z": linear_interpolate(self.config.planform.z, rels),
             "chord": pchip_interpolate(self.config.planform.chord, rels),
             "thickness": cubic_interpolate(
@@ -101,6 +101,8 @@ class Blade:
             "dx": cubic_interpolate(self.config.planform.dx, rels, bc_type="natural"),
             "dy": cubic_interpolate(self.config.planform.dy, rels),
         }
+        result["absolute_thickness"] = result["chord"] * result["thickness"]
+        return result
 
     def get_airfoil_xy_norm(self, thickness: float | np.ndarray) -> np.ndarray:
         """Get normalized airfoil coordinates at specific thickness(es) using precomputed interpolators."""
