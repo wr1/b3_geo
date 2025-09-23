@@ -35,7 +35,9 @@ def save_blade_sections(blade: "Blade", filepath: str):
     poly.points = points
     lines = []
     for i in range(blade.np_spanwise):
-        line = [blade.np_chordwise] + list(range(i * blade.np_chordwise, (i + 1) * blade.np_chordwise))
+        line = [blade.np_chordwise] + list(
+            range(i * blade.np_chordwise, (i + 1) * blade.np_chordwise)
+        )
         lines.append(line)
     poly.lines = lines
     for k, v in grid.field_data.items():
@@ -46,7 +48,9 @@ def save_blade_sections(blade: "Blade", filepath: str):
     t = np.linspace(0, 1, blade.np_chordwise)
     poly.point_data["t"] = np.tile(t, blade.np_spanwise)
     # Add section_id
-    poly.point_data["section_id"] = np.repeat(np.arange(blade.np_spanwise), blade.np_chordwise)
+    poly.point_data["section_id"] = np.repeat(
+        np.arange(blade.np_spanwise), blade.np_chordwise
+    )
     poly.save(filepath)
 
 

@@ -2,10 +2,10 @@
 """Example script for interpolating airfoils from a planform using the b3_geo API."""
 
 import numpy as np
-import yaml
 from pathlib import Path
 from b3_geo.models import Planform, Airfoil, BladeConfig
 from b3_geo.core.blade import Blade
+from b3_geo.utils.cache import save_blade_sections
 
 
 def main():
@@ -81,6 +81,11 @@ def main():
     # Compute sections
     sections = blade.get_sections()
     print("Sections shape:", sections.shape)
+
+    # Save blade sections to VTP
+    vtp_file = example_dir / "ex1_blade.vtp"
+    save_blade_sections(blade, str(vtp_file))
+    print(f"Blade sections saved to {vtp_file}")
 
     print("Example completed successfully.")
 
