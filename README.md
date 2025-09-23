@@ -13,5 +13,5 @@ pip install -e .
 ```bash
 b3-geo af config.yml
 b3-geo loft config.yml
-b3-geo run af loft config.yml
+b3-geo clean config.yml
 ```
