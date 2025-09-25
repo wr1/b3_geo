@@ -7,11 +7,12 @@ class LoftStep(Statesman):
 
     workdir_key = "workdir"
     dependent_sections = ["geometry", "airfoils"]
-    output_files = ["b3_geo/lm1.vtp"]
+    output_files = ["b3_geo/lm1.vtp", "b3_geo/planform.png"]
 
-    def __init__(self, config_path, output_file=None):
+    def __init__(self, config_path, output_file=None, plot=True):
         super().__init__(config_path)
         self.output_file = output_file
+        self.plot = plot
         self.force = False
 
     def run(self, force=False):
@@ -31,4 +32,4 @@ class LoftStep(Statesman):
             "workdir", "."
         )
         workdir = config_dir / workdir_str / "b3_geo"
-        process_loft(self.config_path, workdir=workdir, output_file=self.output_file)
+        process_loft(self.config_path, workdir=workdir, output_file=self.output_file, plot=self.plot)

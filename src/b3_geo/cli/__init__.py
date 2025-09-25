@@ -57,6 +57,12 @@ loft_cmd = command(
             arg_type=bool,
             help="Force rerun despite statesman checks.",
         ),
+        option(
+            flags=["--plot", "-p"],
+            arg_type=bool,
+            default=True,
+            help="Plot planform parameters.",
+        ),
     ],
 )
 app.commands.append(loft_cmd)

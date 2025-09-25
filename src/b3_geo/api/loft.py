@@ -31,7 +31,7 @@ def create_lm1(blade: Blade) -> np.ndarray:
 
 
 def process_loft(
-    config_path: str, workdir: Optional[Path] = None, output_file: Optional[str] = None
+    config_path: str, workdir: Optional[Path] = None, output_file: Optional[str] = None, plot: bool = True
 ) -> np.ndarray:
     """Process loft: create blade model and save to VTP."""
     start_time = time.time()
@@ -84,6 +84,29 @@ def process_loft(
         vtp_file = workdir / "lm1.vtp"
     save_blade_sections(blade, str(vtp_file))
     logger.info(f"Saved blade sections to {vtp_file}")
+    if plot:
+        controls = {
+            "z": planform_data_config.get("z", []),
+            "chord": planform_data_config.get("chord", []),
+            "thickness": planform_data_config.get("thickness", []),
+            "twist": planform_data_config.get("twist", []),
+            "dx": planform_data_config.get("dx", []),
+            "dy": planform_data_config.get("dy", []),
+        }
+        interpolated = {
+            "rel_span": blade.rel_span,
+            "z": blade.z,
+            "chord": blade.chord,
+            "thickness": blade.thickness,
+            "twist": blade.twist,
+            "dx": blade.dx,
+            "dy": blade.dy,
+            "absolute_thickness": blade.absolute_thickness,
+        }
+        planform_plot_file = workdir / "planform.png"
+        from b3_geo.utils.plotting import plot_planform
+        plot_planform(interpolated, controls, blade.rel_span, str(planform_plot_file))
+        logger.info(f"Saved planform plot to {planform_plot_file}")
     # Create sections at mesh.z positions
     mesh_data = config_data.get("mesh", {})
     mesh_z_config = mesh_data.get("z", [])
