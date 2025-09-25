@@ -6,7 +6,7 @@ from .interpolation import (
     pchip_interpolate,
 )
 from .plotting import plot_airfoils, plot_planform
-from .cache import save_blade_sections, load_blade_sections
+from .cache import save_blade_sections
 
 __all__ = [
     "load_airfoil",
@@ -17,5 +17,4 @@ __all__ = [
     "plot_airfoils",
     "plot_planform",
     "save_blade_sections",
-    "load_blade_sections",
 ]

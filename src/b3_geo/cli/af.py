@@ -1,6 +1,7 @@
-from ..api import process_af
+from ..api.af_step import AFStep
 
 
-def af_command(config_path: str):
+def af_command(config_file: str, force: bool = False):
     """Command to process airfoils."""
-    process_af(config_path)
+    step = AFStep(config_file)
+    step.run(force=force)

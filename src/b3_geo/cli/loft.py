@@ -1,6 +1,7 @@
-from ..api import process_loft
+from ..api.loft_step import LoftStep
 
 
-def loft_command(config_path: str, output_file: str = None):
+def loft_command(config_file: str, file: str = None, force: bool = False):
     """Command to process loft."""
-    process_loft(config_path, output_file=output_file)
+    step = LoftStep(config_file, output_file=file)
+    step.run(force=force)

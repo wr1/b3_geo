@@ -10,6 +10,7 @@ logging.basicConfig(level=logging.INFO)
 from .af import af_command
 from .loft import loft_command
 from .clean import clean_command
+from .planform import planform_command
 
 
 app = cli(
@@ -21,7 +22,6 @@ app = cli(
     line_connect=True,
     theme="monochrome",
 )
-
 af_cmd = command(
     name="af",
     help="Load and resample airfoils, plot and export.",
@@ -30,11 +30,6 @@ af_cmd = command(
         argument(name="config_file", arg_type=str, help="Path to config file"),
     ],
     options=[
-        option(
-            flags=["--file", "-f"],
-            arg_type=str,
-            help="Output file path.",
-        ),
         option(
             flags=["--force", "-F"],
             arg_type=bool,
@@ -76,15 +71,28 @@ clean_cmd = command(
 )
 app.commands.append(clean_cmd)
 
+planform_cmd = command(
+    name="planform",
+    help="Plot planform from config.",
+    callback=planform_command,
+    arguments=[
+        argument(name="config_file", arg_type=str, help="Path to config file"),
+    ],
+    options=[
+        option(
+            flags=["--output", "-o"],
+            arg_type=str,
+            help="Output file path.",
+        ),
+    ],
+)
+app.commands.append(planform_cmd)
+
 
 def main():
     # If only one argument and it's not a command or flag, assume 'loft'
-    if (
-        len(sys.argv) == 2
-        and not sys.argv[1].startswith("-")
-        and sys.argv[1] not in ["af", "loft", "clean"]
-    ):
-        sys.argv.insert(1, "loft")
+    if len(sys.argv) == 2 and not sys.argv[1].startswith('-') and sys.argv[1] not in ['af', 'loft', 'clean', 'planform']:
+        sys.argv.insert(1, 'loft')
     app.run()
 
 

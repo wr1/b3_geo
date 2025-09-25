@@ -9,8 +9,9 @@ class LoftStep(Statesman):
     dependent_sections = ["geometry", "airfoils"]
     output_files = ["b3_geo/lm1.vtp"]
 
-    def __init__(self, config_path):
+    def __init__(self, config_path, output_file=None):
         super().__init__(config_path)
+        self.output_file = output_file
         self.force = False
 
     def run(self, force=False):
@@ -30,4 +31,4 @@ class LoftStep(Statesman):
             "workdir", "."
         )
         workdir = config_dir / workdir_str / "b3_geo"
-        process_loft(self.config_path, workdir=workdir)
+        process_loft(self.config_path, workdir=workdir, output_file=self.output_file)

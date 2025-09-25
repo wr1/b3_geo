@@ -5,33 +5,24 @@ from typing import Optional
 from b3_geo.models import Planform, Airfoil, BladeConfig
 from b3_geo.core.blade import Blade
 from b3_geo.utils.cache import save_blade_sections
-from b3_geo.utils.interpolation import (
-    linear_interpolate,
-    pchip_interpolate,
-    cubic_interpolate,
-)
+from .planform import interpolate_planform
 import logging
 import time
 
 logger = logging.getLogger(__name__)
 
 
-def interpolate_planform(planform_data, npspan):
-    """Interpolate planform parameters."""
-    rel_span = np.linspace(0, 1, npspan)
-    interp_plan = {
-        "rel_span": rel_span,
-        "z": linear_interpolate(planform_data["z"], rel_span),
-        "chord": pchip_interpolate(planform_data["chord"], rel_span),
-        "thickness": cubic_interpolate(
-            planform_data["thickness"], rel_span, bc_type="natural"
-        ),
-        "twist": pchip_interpolate(planform_data["twist"], rel_span),
-        "dx": cubic_interpolate(planform_data["dx"], rel_span, bc_type="natural"),
-        "dy": cubic_interpolate(planform_data["dy"], rel_span),
-    }
-    interp_plan["absolute_thickness"] = interp_plan["chord"] * interp_plan["thickness"]
-    return interp_plan
+def expand_mesh_z(mesh_z_config):
+    """Expand mesh z configuration to list of z values."""
+    z_list = []
+    for item in mesh_z_config:
+        if item["type"] == "plain":
+            z_list.extend(item["values"])
+        elif item["type"] == "linspace":
+            start, end = item["values"]
+            num = item["num"]
+            z_list.extend(np.linspace(start, end, num))
+    return sorted(set(z_list))
 
 
 def create_lm1(blade: Blade) -> np.ndarray:
@@ -95,8 +86,10 @@ def process_loft(
     logger.info(f"Saved blade sections to {vtp_file}")
     # Create sections at mesh.z positions
     mesh_data = config_data.get("mesh", {})
-    mesh_z = mesh_data.get("z", [])
-    if mesh_z:
+    mesh_z_config = mesh_data.get("z", [])
+    if mesh_z_config:
+        mesh_z = expand_mesh_z(mesh_z_config)
+        logger.info(f"Mesh z values: {mesh_z}")
         rels_mesh = np.array([blade.z_to_rel(z) for z in mesh_z])
         sections_mesh = blade.get_sections(rels_mesh)
         mesh_vtp_file = workdir / "lm1_mesh.vtp"
