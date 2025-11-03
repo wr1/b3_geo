@@ -2,10 +2,16 @@ import sys
 import logging
 from pathlib import Path
 
+from rich.logging import RichHandler
+
 sys.path.append(str(Path(__file__).parent.parent / "src"))
 from treeparse import cli, command, argument, option
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    handlers=[RichHandler(show_time=False)],
+)
 
 from .af import af_command
 from .loft import loft_command

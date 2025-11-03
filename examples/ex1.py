@@ -6,6 +6,15 @@ from pathlib import Path
 from b3_geo.models import Planform, Airfoil, BladeConfig
 from b3_geo.core.blade import Blade
 from b3_geo.utils.cache import save_blade_sections
+import logging
+from rich.logging import RichHandler
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    handlers=[RichHandler(show_time=False)],
+)
 
 
 def main():
@@ -67,27 +76,27 @@ def main():
     thicknesses = np.array([0.15, 0.18, 0.2])
     interpolated_airfoils = blade.get_airfoil_xy_norm(thicknesses)
 
-    print("Interpolated airfoils shape:", interpolated_airfoils.shape)
-    print("Example interpolated points for thickness 0.2:")
-    print(interpolated_airfoils[2][:5])  # First 5 points of the last airfoil
+    logger.info(f"Interpolated airfoils shape: {interpolated_airfoils.shape}")
+    logger.info("Example interpolated points for thickness 0.2:")
+    logger.info(f"{interpolated_airfoils[2][:5]}")
 
     # Get planform values at specific relative spans
     rel_spans = np.array([0.0, 0.5, 1.0])
     planform_vals = blade.get_planform_array(rel_spans)
-    print("Planform values at rel_spans [0.0, 0.5, 1.0]:")
+    logger.info("Planform values at rel_spans [0.0, 0.5, 1.0]:")
     for key, val in planform_vals.items():
-        print(f"{key}: {val}")
+        logger.info(f"{key}: {val}")
 
     # Compute sections
     sections = blade.get_sections()
-    print("Sections shape:", sections.shape)
+    logger.info(f"Sections shape: {sections.shape}")
 
     # Save blade sections to VTP
     vtp_file = example_dir / "ex1_blade.vtp"
     save_blade_sections(blade, str(vtp_file))
-    print(f"Blade sections saved to {vtp_file}")
+    logger.info(f"Blade sections saved to {vtp_file}")
 
-    print("Example completed successfully.")
+    logger.info("Example completed successfully.")
 
 
 if __name__ == "__main__":

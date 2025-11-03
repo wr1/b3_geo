@@ -7,6 +7,15 @@ from b3_geo.models import Planform, Airfoil, BladeConfig
 from b3_geo.core.blade import Blade
 from b3_geo.utils.cache import save_blade_sections
 from b3_geo.utils import plot_planform
+import logging
+from rich.logging import RichHandler
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    handlers=[RichHandler(show_time=False)],
+)
 
 
 def main():
@@ -68,21 +77,21 @@ def main():
     }
     planform_plot_file = example_dir / "planform.png"
     plot_planform(interpolated, controls, blade.rel_span, str(planform_plot_file))
-    print(f"Planform plot saved to {planform_plot_file}")
+    logger.info(f"Planform plot saved to {planform_plot_file}")
 
     # Plot the blended airfoils
     thicknesses = np.linspace(0.18, 0.3, 5)
     airfoil_plot_file = example_dir / "blended_naca.png"
     blade.plot_airfoils(thicknesses, str(airfoil_plot_file))
-    print(f"Airfoil plot saved to {airfoil_plot_file}")
+    logger.info(f"Airfoil plot saved to {airfoil_plot_file}")
 
     # Compute and save blade sections to VTP
     sections = blade.get_sections()
     vtp_file = example_dir / "blended_naca_blade.vtp"
     save_blade_sections(blade, str(vtp_file))
-    print(f"Blade sections saved to {vtp_file}")
+    logger.info(f"Blade sections saved to {vtp_file}")
 
-    print("Example completed successfully.")
+    logger.info("Example completed successfully.")
 
 
 if __name__ == "__main__":

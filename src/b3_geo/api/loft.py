@@ -112,7 +112,7 @@ def process_loft(
     mesh_z_config = mesh_data.get("z", [])
     if mesh_z_config:
         mesh_z = expand_mesh_z(mesh_z_config)
-        logger.info(f"Mesh z values: {mesh_z}")
+        logger.info(f"Mesh z values: {[float(z) for z in mesh_z]}")
         rels_mesh = np.array([blade.z_to_rel(z) for z in mesh_z])
         sections_mesh = blade.get_sections(rels_mesh)
         mesh_vtp_file = workdir / "lm1_mesh.vtp"

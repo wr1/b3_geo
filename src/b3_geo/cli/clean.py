@@ -1,6 +1,9 @@
 from pathlib import Path
 import yaml
 import shutil
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def clean_command(config_file: str):
@@ -14,11 +17,11 @@ def clean_command(config_file: str):
     try:
         workdir_path.relative_to(Path.cwd())
     except ValueError:
-        print("Cannot delete outside of current working directory.")
+        logger.error("Cannot delete outside of current working directory.")
         return
     b3_geo_dir = workdir_path / "b3_geo"
     if b3_geo_dir.exists():
         shutil.rmtree(b3_geo_dir)
-        print(f"Removed {b3_geo_dir}")
+        logger.info(f"Removed {b3_geo_dir}")
     else:
-        print(f"{b3_geo_dir} does not exist.")
+        logger.info(f"{b3_geo_dir} does not exist.")
