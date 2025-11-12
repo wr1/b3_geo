@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "b3-geo"
-version = "0.1.0"
+version = "0.1.1"
 description = "Blade geometry module for b3m"
 authors = [{name = "wr1", email = "8971152+wr1@users.noreply.github.com"}]
 readme = "README.md"
