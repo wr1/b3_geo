@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 
 def save_blade_sections(blade: "Blade", filepath: str, sections=None, rel_spans=None):
-    """Save blade sections to VTU with planform data."""
+    """Save blade sections to VTP with planform data."""
     if sections is None:
         sections = blade.get_sections()
         rel_spans = blade.rel_span
@@ -55,6 +55,4 @@ def save_blade_sections(blade: "Blade", filepath: str, sections=None, rel_spans=
     poly.point_data["t"] = np.tile(t, n_sections)
     # Add section_id
     poly.point_data["section_id"] = np.repeat(np.arange(n_sections), blade.np_chordwise)
-    # Convert to UnstructuredGrid for VTU
-    ugrid = pv.wrap(poly)
-    ugrid.save(filepath)
+    poly.save(filepath)
