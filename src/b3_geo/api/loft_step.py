@@ -7,7 +7,7 @@ class LoftStep(Statesman):
 
     workdir_key = "workdir"
     dependent_sections = ["geometry", "airfoils"]
-    output_files = ["b3_geo/lm1.vtp", "b3_geo/planform.png"]
+    output_files = ["b3_geo/lm1.vtu", "b3_geo/lm1_mesh.vtu", "b3_geo/planform.png"]
 
     def __init__(self, config_path, output_file=None, plot=True):
         super().__init__(config_path)

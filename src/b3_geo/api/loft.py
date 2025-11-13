@@ -33,7 +33,7 @@ def create_lm1(blade: Blade) -> np.ndarray:
 def process_loft(
     config_path: str, workdir: Optional[Path] = None, output_file: Optional[str] = None, plot: bool = True
 ) -> np.ndarray:
-    """Process loft: create blade model and save to VTP."""
+    """Process loft: create blade model and save to VTU."""
     start_time = time.time()
     logger.info("Starting loft step")
     config_data = yaml.safe_load(Path(config_path).read_text())
@@ -79,11 +79,11 @@ def process_loft(
     blade = Blade(blade_config)
     sections = create_lm1(blade)
     if output_file:
-        vtp_file = Path(output_file)
+        vtu_file = Path(output_file)
     else:
-        vtp_file = workdir / "lm1.vtp"
-    save_blade_sections(blade, str(vtp_file))
-    logger.info(f"Saved blade sections to {vtp_file}")
+        vtu_file = workdir / "lm1.vtu"
+    save_blade_sections(blade, str(vtu_file))
+    logger.info(f"Saved blade sections to {vtu_file}")
     if plot:
         controls = {
             "z": planform_data_config.get("z", []),
@@ -115,11 +115,11 @@ def process_loft(
         logger.info(f"Mesh z values: {[float(z) for z in mesh_z]}")
         rels_mesh = np.array([blade.z_to_rel(z) for z in mesh_z])
         sections_mesh = blade.get_sections(rels_mesh)
-        mesh_vtp_file = workdir / "lm1_mesh.vtp"
+        mesh_vtu_file = workdir / "lm1_mesh.vtu"
         save_blade_sections(
-            blade, str(mesh_vtp_file), sections=sections_mesh, rel_spans=rels_mesh
+            blade, str(mesh_vtu_file), sections=sections_mesh, rel_spans=rels_mesh
         )
-        logger.info(f"Saved mesh sections to {mesh_vtp_file}")
+        logger.info(f"Saved mesh sections to {mesh_vtu_file}")
     logger.info("Loft step completed")
     elapsed = time.time() - start_time
     logger.info(f"Loft step took {elapsed:.2f} seconds")
