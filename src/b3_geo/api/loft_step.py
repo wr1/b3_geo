@@ -7,13 +7,16 @@ class LoftStep(Statesman):
 
     workdir_key = "workdir"
     dependent_sections = ["geometry", "airfoils"]
-    output_files = ["b3_geo/lm1.vtp", "b3_geo/lm1_mesh.vtp", "b3_geo/planform.png"]
 
     def __init__(self, config_path, output_file=None, plot=True):
         super().__init__(config_path)
         self.output_file = output_file
         self.plot = plot
         self.force = False
+        # Conditionally set output_files based on presence of mesh config
+        self.output_files = ["b3_geo/lm1.vtp", "b3_geo/planform.png"]
+        if "mesh" in self.config and self.config["mesh"].get("z"):
+            self.output_files.append("b3_geo/lm1_mesh.vtp")
 
     def run(self, force=False):
         self.force = force
