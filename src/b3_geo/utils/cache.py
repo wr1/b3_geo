@@ -10,14 +10,10 @@ if TYPE_CHECKING:
 def save_blade_sections(blade: "Blade", filepath: str, sections=None, rel_spans=None):
     """Save blade sections to VTP with planform data."""
     if sections is None:
-        sections = blade.get_sections()
+        sections = blade.get_sections(blade.rel_span)
         rel_spans = blade.rel_span
-    else:
-        if rel_spans is None:
-            rel_spans = blade.rel_span
-    points = sections.reshape(-1, 3)
-    grid = build_sections_poly(points, blade.np_chordwise, blade.np_spanwise)
-    grid.field_data["np_spanwise"] = [len(rel_spans)]
+    grid = build_sections_poly(sections.reshape(-1, 3), blade.np_chordwise, sections.shape[0])
+    grid.field_data["np_spanwise"] = [sections.shape[0]]
     grid.field_data["np_chordwise"] = [blade.np_chordwise]
     # Add point_data for planform parameters
     vals = blade.get_planform_array(rel_spans)
@@ -37,9 +33,9 @@ def save_blade_sections(blade: "Blade", filepath: str, sections=None, rel_spans=
             grid.point_data[k] = np.repeat(vals[k], blade.np_chordwise)
     # Convert to PolyData for VTP
     poly = pv.PolyData()
-    poly.points = points
+    poly.points = sections.reshape(-1, 3)
     lines = []
-    n_sections = len(rel_spans)
+    n_sections = sections.shape[0]
     for i in range(n_sections):
         line = [blade.np_chordwise] + list(
             range(i * blade.np_chordwise, (i + 1) * blade.np_chordwise)

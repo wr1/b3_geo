@@ -25,14 +25,25 @@ def expand_mesh_z(mesh_z_config):
     return sorted(set(z_list))
 
 
-def create_lm1(blade: Blade) -> np.ndarray:
-    """Create LM1 sections."""
-    return blade.get_sections()
+def plot_planform_from_blade(blade: Blade, controls: dict, output_file: str):
+    """Plot planform from blade object."""
+    interpolated = {
+        "rel_span": blade.rel_span,
+        "z": blade.z,
+        "chord": blade.chord,
+        "thickness": blade.thickness,
+        "twist": blade.twist,
+        "dx": blade.dx,
+        "dy": blade.dy,
+        "absolute_thickness": blade.absolute_thickness,
+    }
+    from b3_geo.utils.plotting import plot_planform
+    plot_planform(interpolated, controls, blade.rel_span, output_file)
 
 
 def process_loft(
     config_path: str, workdir: Optional[Path] = None, output_file: Optional[str] = None, plot: bool = True
-) -> np.ndarray:
+) -> Optional[np.ndarray]:
     """Process loft: create blade model and save to VTP."""
     start_time = time.time()
     logger.info("Starting loft step")
@@ -47,9 +58,7 @@ def process_loft(
     workdir.mkdir(exist_ok=True, parents=True)
     geometry_data = config_data.get("geometry", {})
     planform_data_config = geometry_data.get("planform", {})
-    pre_rotation = planform_data_config.get("pre_rotation", 0.0)
-    logger.info(f"Pre-rotation: {pre_rotation}")
-    npspan = planform_data_config.get("npspan", 100)
+    npspan = 100
     interp_plan = interpolate_planform(planform_data_config, npspan)
     airfoils_data = config_data.get("airfoils", [])
     logger.info(f"Airfoils data: {airfoils_data}")
@@ -58,12 +67,10 @@ def process_loft(
         z=list(zip(interp_plan["rel_span"], interp_plan["z"])),
         chord=list(zip(interp_plan["rel_span"], interp_plan["chord"])),
         thickness=list(zip(interp_plan["rel_span"], interp_plan["thickness"])),
-        twist=list(zip(interp_plan["rel_span"], interp_plan["twist"] + pre_rotation)),
+        twist=list(zip(interp_plan["rel_span"], interp_plan["twist"])),
         dx=list(zip(interp_plan["rel_span"], interp_plan["dx"])),
         dy=list(zip(interp_plan["rel_span"], interp_plan["dy"])),
-        pre_rotation=0.0,
         npchord=planform_data_config.get("npchord", 200),
-        npspan=npspan,
     )
     blade_config = BladeConfig(
         planform=planform,
@@ -77,13 +84,6 @@ def process_loft(
         ],
     )
     blade = Blade(blade_config)
-    sections = create_lm1(blade)
-    if output_file:
-        vtp_file = Path(output_file)
-    else:
-        vtp_file = workdir / "lm1.vtp"
-    save_blade_sections(blade, str(vtp_file))
-    logger.info(f"Saved blade sections to {vtp_file}")
     if plot:
         controls = {
             "z": planform_data_config.get("z", []),
@@ -93,23 +93,13 @@ def process_loft(
             "dx": planform_data_config.get("dx", []),
             "dy": planform_data_config.get("dy", []),
         }
-        interpolated = {
-            "rel_span": blade.rel_span,
-            "z": blade.z,
-            "chord": blade.chord,
-            "thickness": blade.thickness,
-            "twist": blade.twist,
-            "dx": blade.dx,
-            "dy": blade.dy,
-            "absolute_thickness": blade.absolute_thickness,
-        }
         planform_plot_file = workdir / "planform.png"
-        from b3_geo.utils.plotting import plot_planform
-        plot_planform(interpolated, controls, blade.rel_span, str(planform_plot_file))
+        plot_planform_from_blade(blade, controls, str(planform_plot_file))
         logger.info(f"Saved planform plot to {planform_plot_file}")
     # Create sections at mesh.z positions
     mesh_data = config_data.get("mesh", {})
     mesh_z_config = mesh_data.get("z", [])
+    sections_mesh = None
     if mesh_z_config:
         mesh_z = expand_mesh_z(mesh_z_config)
         logger.info(f"Mesh z values: {[float(z) for z in mesh_z]}")
@@ -123,4 +113,4 @@ def process_loft(
     logger.info("Loft step completed")
     elapsed = time.time() - start_time
     logger.info(f"Loft step took {elapsed:.2f} seconds")
-    return sections
+    return sections_mesh

@@ -11,6 +11,7 @@ from scipy.interpolate import interp1d
 from typing import Dict
 import logging
 import matplotlib.pyplot as plt
+import pyvista as pv
 
 
 class Blade:
@@ -20,7 +21,6 @@ class Blade:
         self.logger = logging.getLogger(__name__)
         self.config = config
         self.np_chordwise = self.config.planform.npchord
-        self.np_spanwise = self.config.planform.npspan
         self._interpolate_planform()
         self.airfoils_data: Dict[str, Dict] = {}
         for af in self.config.airfoils:
@@ -50,11 +50,10 @@ class Blade:
             bounds_error=False,
             fill_value=(y_all[:, 0], y_all[:, -1]),
         )
-        self.logger.info(f"Blade pre-rotation: {self.config.planform.pre_rotation}")
 
     def _interpolate_planform(self):
         """Interpolate planform parameters along the span."""
-        self.rel_span = np.linspace(0, 1, self.np_spanwise)
+        self.rel_span = np.linspace(0, 1, 100)
         self.span = self.rel_span * 100
         self.z = linear_interpolate(self.config.planform.z, self.rel_span)
         self.chord = pchip_interpolate(self.config.planform.chord, self.rel_span)
@@ -127,28 +126,25 @@ class Blade:
         plt.savefig(output_file)
         plt.close()
 
-    def get_sections(self, rels: np.ndarray = None) -> np.ndarray:
-        """Compute positioned and rotated airfoil sections at given relative spans."""
-        if rels is None:
-            rels = self.rel_span
+    def get_sections(self, rels: np.ndarray) -> np.ndarray:
+        """Compute positioned and rotated airfoil sections at given relative spans using PyVista operations."""
         vals = self.get_planform_array(rels)
         xy_norm = self.get_airfoil_xy_norm(vals["thickness"])  # (chord, n, 2)
-        twist_center = 0.5
-        xy = xy_norm.copy()
-        xy[..., 0] -= twist_center
-        xy *= vals["chord"][None, :, None]
-        thetas = np.deg2rad(vals["twist"])
-        self.logger.info(f"Pre-rotation applied: {self.config.planform.pre_rotation}")
-        cos_t = np.cos(thetas)[None, :]
-        sin_t = np.sin(thetas)[None, :]
-        rot_x = cos_t * xy[..., 0] - sin_t * xy[..., 1]
-        rot_y = sin_t * xy[..., 0] + cos_t * xy[..., 1]
-        xy[..., 0] = rot_x + vals["dx"][None, :]
-        xy[..., 1] = rot_y + vals["dy"][None, :]
-        points = np.zeros((self.np_chordwise, len(rels), 3))
-        points[..., :2] = xy
-        points[..., 2] = vals["z"][None, :]
-        return points.transpose(1, 0, 2)  # (n, chord, 3)
+        points_list = []
+        for i in range(len(rels)):
+            xy = xy_norm[:, i, :]  # (chord, 2)
+            points_2d = np.column_stack((xy, np.zeros(self.np_chordwise)))  # (chord, 3)
+            poly = pv.PolyData(points_2d)
+            # Translate to twist center at 0
+            poly.translate([0, -0.5, 0], inplace=True)
+            # Scale by chord
+            poly.scale([vals["chord"][i], vals["chord"][i], 1], inplace=True)
+            # Rotate by twist around z-axis
+            poly.rotate_z(-vals["twist"][i], inplace=True)
+            # Translate by dx, dy, z
+            poly.translate([vals["dx"][i], vals["dy"][i], vals["z"][i]], inplace=True)
+            points_list.append(poly.points)
+        return np.array(points_list)  # (n, chord, 3)
 
     def z_to_rel(self, z_val: float | np.ndarray) -> float | np.ndarray:
         """Convert absolute z to relative span."""

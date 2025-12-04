@@ -11,9 +11,7 @@ class Planform(BaseModel):
     twist: List[Tuple[float, float]]
     dx: List[Tuple[float, float]]
     dy: List[Tuple[float, float]]
-    pre_rotation: float = 0.0
     npchord: int = 200
-    npspan: int = 100
 
 
 class Airfoil(BaseModel):
