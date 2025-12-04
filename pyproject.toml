@@ -1,30 +1,39 @@
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "b3-geo"
-version = "0.1.1"
-description = "Blade geometry module for b3m"
-authors = [{name = "wr1", email = "8971152+wr1@users.noreply.github.com"}]
-readme = "README.md"
-requires-python = ">=3.8"
+version = "0.1.0"
+description = "Blade geometry generation"
+authors = [{name = "Your Name"}]
 dependencies = [
     "numpy",
     "scipy",
     "matplotlib",
+    "pydantic",
     "pyvista",
-    "pydantic>=2.0,<3.0",
     "pyyaml",
-    "treeparse",
     "rich",
-    "pytest",
-    "pytest-cov",
-    "statesman @ git+https://github.com/wr1/statesman.git",
+    "treeparse",
+    "statesman",
 ]
 
 [project.scripts]
 b3-geo = "b3_geo.cli:main"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.ruff]
+line-length = 88
+target-version = "py38"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "C90", "I", "N", "UP", "YTT", "S", "BLE", "FBT", "B", "A", "COM", "C4", "DTZ", "T10", "DJ", "EM", "EXE", "FA", "ISC", "ICN", "G", "INP", "PIE", "T20", "PYI", "PT", "Q", "RSE", "RET", "SLF", "SLOT", "SIM", "TID", "TCH", "INT", "ARG", "PTH", "ERA", "PD", "PGH", "PL", "TRY", "FLY", "NPY", "AIR", "PERF", "FURB", "LOG", "RUF"]
+ignore = ["S101", "S104", "COM812", "ISC001"]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest",
+    "ruff",
+    "mkdocs",
+    "mkdocs-material",
+]

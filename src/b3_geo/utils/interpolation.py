@@ -6,7 +6,9 @@ import pyvista as pv
 
 def load_airfoil(path: str) -> np.ndarray:
     """Load airfoil data from file."""
-    return np.loadtxt(path, skiprows=1)
+    data = np.loadtxt(path, skiprows=1)
+    data[:, 1] = -data[:, 1]  # Flip y direction
+    return data
 
 
 def interpolate_airfoil(data: np.ndarray, n_points: int) -> np.ndarray:
