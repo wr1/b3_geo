@@ -17,9 +17,7 @@ def test_blade_init(tmp_path):
         twist=[(0.0, 0.0), (1.0, 5.0)],
         dx=[(0.0, 0.0), (1.0, 1.0)],
         dy=[(0.0, 0.0), (1.0, 0.5)],
-        pre_rotation=0.0,
         npchord=10,
-        npspan=10,
     )
 
     # Create airfoil
@@ -29,8 +27,7 @@ def test_blade_init(tmp_path):
     blade = Blade(blade_config)
 
     assert blade.np_chordwise == 10
-    assert blade.np_spanwise == 10
-    assert blade.rel_span.shape == (10,)
+    assert len(blade.rel_span) == 100
 
 
 def test_blade_plot_airfoils(tmp_path):
@@ -47,9 +44,7 @@ def test_blade_plot_airfoils(tmp_path):
         twist=[(0.0, 0.0), (1.0, 5.0)],
         dx=[(0.0, 0.0), (1.0, 1.0)],
         dy=[(0.0, 0.0), (1.0, 0.5)],
-        pre_rotation=0.0,
         npchord=10,
-        npspan=10,
     )
 
     # Create airfoil

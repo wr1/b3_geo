@@ -56,9 +56,7 @@ def main():
         twist=[(0.0, 0.0), (0.5, 2.5), (1.0, 5.0)],
         dx=[(0.0, 0.0), (0.5, 0.5), (1.0, 1.0)],
         dy=[(0.0, 0.0), (0.5, 0.25), (1.0, 0.5)],
-        pre_rotation=0.0,
         npchord=200,
-        npspan=50,
     )
 
     # Define airfoils
@@ -88,7 +86,7 @@ def main():
         logger.info(f"{key}: {val}")
 
     # Compute sections
-    sections = blade.get_sections()
+    sections = blade.get_sections(blade.rel_span)
     logger.info(f"Sections shape: {sections.shape}")
 
     # Save blade sections to VTP
