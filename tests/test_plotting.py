@@ -1,4 +1,5 @@
 import numpy as np
+
 from b3_geo.utils.plotting import plot_airfoils, plot_planform
 
 

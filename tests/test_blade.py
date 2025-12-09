@@ -1,6 +1,7 @@
 import numpy as np
+
 from b3_geo.core.blade import Blade
-from b3_geo.models import Planform, Airfoil, BladeConfig
+from b3_geo.models import Airfoil, BladeConfig, Planform
 
 
 def test_blade_init(tmp_path):

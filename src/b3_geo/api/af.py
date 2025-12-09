@@ -1,17 +1,20 @@
-from pathlib import Path
-import yaml
-import numpy as np
-from typing import Dict, List
-from b3_geo.models import Airfoil
-from b3_geo.utils.interpolation import load_airfoil, interpolate_airfoil
-from b3_geo.utils.plotting import plot_airfoils
+from __future__ import annotations
+
 import logging
 import time
+from pathlib import Path
+
+import numpy as np
+import yaml
+
+from b3_geo.models import Airfoil
+from b3_geo.utils.interpolation import interpolate_airfoil, load_airfoil
+from b3_geo.utils.plotting import plot_airfoils
 
 logger = logging.getLogger(__name__)
 
 
-def resample_airfoils(airfoils: List[Airfoil], npchord: int) -> Dict[str, Dict]:
+def resample_airfoils(airfoils: list[Airfoil], npchord: int) -> dict[str, dict]:
     """Resample airfoils to uniform points."""
     airfoils_dict = {}
     for af in airfoils:
@@ -21,7 +24,7 @@ def resample_airfoils(airfoils: List[Airfoil], npchord: int) -> Dict[str, Dict]:
     return airfoils_dict
 
 
-def process_af(config_path: str, workdir: Path = None) -> Dict[str, Dict]:
+def process_af(config_path: str, workdir: Path | None = None) -> dict[str, dict]:
     """Process airfoils: load, resample, plot, and save."""
     start_time = time.time()
     logger.info("Starting af step")

@@ -1,14 +1,14 @@
+from __future__ import annotations
+
 import numpy as np
-from scipy.interpolate import CubicSpline, PchipInterpolator
-from typing import List, Tuple
 import pyvista as pv
+from scipy.interpolate import CubicSpline, PchipInterpolator
 
 
 def load_airfoil(path: str) -> np.ndarray:
     """Load airfoil data from file."""
     data = np.loadtxt(path, skiprows=1)
-    data = data[:, [1, 0]]  # Switch x and y axes
-    return data
+    return data[:, [1, 0]]  # Switch x and y axes
 
 
 def interpolate_airfoil(data: np.ndarray, n_points: int) -> np.ndarray:
@@ -23,7 +23,7 @@ def interpolate_airfoil(data: np.ndarray, n_points: int) -> np.ndarray:
     return np.column_stack((x_spl(new_s), y_spl(new_s)))
 
 
-def linear_interpolate(points: List[Tuple[float, float]], x: np.ndarray) -> np.ndarray:
+def linear_interpolate(points: list[tuple[float, float]], x: np.ndarray) -> np.ndarray:
     """Linear interpolation at given x values."""
     points = sorted(points)
     xs, ys = zip(*points)
@@ -31,7 +31,7 @@ def linear_interpolate(points: List[Tuple[float, float]], x: np.ndarray) -> np.n
 
 
 def cubic_interpolate(
-    points: List[Tuple[float, float]], x: np.ndarray, bc_type: str = "clamped"
+    points: list[tuple[float, float]], x: np.ndarray, bc_type: str = "clamped"
 ) -> np.ndarray:
     """Cubic spline interpolation at given x values."""
     points = sorted(points)
@@ -40,7 +40,7 @@ def cubic_interpolate(
     return spline(x)
 
 
-def pchip_interpolate(points: List[Tuple[float, float]], x: np.ndarray) -> np.ndarray:
+def pchip_interpolate(points: list[tuple[float, float]], x: np.ndarray) -> np.ndarray:
     """PCHIP interpolation at given x values."""
     points = sorted(points)
     xs, ys = zip(*points)

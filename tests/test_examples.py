@@ -1,5 +1,4 @@
 import sys
-import os
 from pathlib import Path
 
 # Add src to path for imports
@@ -10,6 +9,7 @@ def test_ex1_example():
     """Test running ex1.py example."""
     # Import the main function
     from examples.ex1 import main
+
     # Run it
     main()
     # Check if outputs exist
@@ -21,6 +21,7 @@ def test_blend_naca_example():
     """Test running blend_naca.py example."""
     # Import the main function
     from examples.blend_naca import main
+
     # Run it
     main()
     # Check if outputs exist

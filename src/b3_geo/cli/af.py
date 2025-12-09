@@ -1,4 +1,4 @@
-from ..api.af_step import AFStep
+from src.b3_geo.api.af_step import AFStep
 
 
 def af_command(config_file: str, force: bool = False):

@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Example script for interpolating airfoils from a planform using the b3_geo API."""
 
-import numpy as np
-from pathlib import Path
-from b3_geo.models import Planform, Airfoil, BladeConfig
-from b3_geo.core.blade import Blade
-from b3_geo.utils.cache import save_blade_sections
 import logging
+from pathlib import Path
+
+import numpy as np
 from rich.logging import RichHandler
+
+from b3_geo.core.blade import Blade
+from b3_geo.models import Airfoil, BladeConfig, Planform
+from b3_geo.utils.cache import save_blade_sections
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(

@@ -1,9 +1,10 @@
 import numpy as np
+
 from b3_geo.utils.interpolation import (
-    load_airfoil,
+    cubic_interpolate,
     interpolate_airfoil,
     linear_interpolate,
-    cubic_interpolate,
+    load_airfoil,
     pchip_interpolate,
 )
 

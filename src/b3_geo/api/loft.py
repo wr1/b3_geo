@@ -1,13 +1,17 @@
-from pathlib import Path
-import yaml
-import numpy as np
-from typing import Optional
-from b3_geo.models import Planform, Airfoil, BladeConfig
-from b3_geo.core.blade import Blade
-from b3_geo.utils.cache import save_blade_sections
-from .planform import interpolate_planform
+from __future__ import annotations
+
 import logging
 import time
+from pathlib import Path
+
+import numpy as np
+import yaml
+
+from b3_geo.core.blade import Blade
+from b3_geo.models import Airfoil, BladeConfig, Planform
+from b3_geo.utils.cache import save_blade_sections
+
+from .planform import interpolate_planform
 
 logger = logging.getLogger(__name__)
 
@@ -38,12 +42,16 @@ def plot_planform_from_blade(blade: Blade, controls: dict, output_file: str):
         "absolute_thickness": blade.absolute_thickness,
     }
     from b3_geo.utils.plotting import plot_planform
+
     plot_planform(interpolated, controls, blade.rel_span, output_file)
 
 
 def process_loft(
-    config_path: str, workdir: Optional[Path] = None, output_file: Optional[str] = None, plot: bool = True
-) -> Optional[np.ndarray]:
+    config_path: str,
+    workdir: Path | None = None,
+    output_file: str | None = None,
+    plot: bool = True,
+) -> np.ndarray | None:
     """Process loft: create blade model and save to VTP."""
     start_time = time.time()
     logger.info("Starting loft step")

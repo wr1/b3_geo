@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """Example script for blending three NACA airfoils using the b3_geo API."""
 
-import numpy as np
-from pathlib import Path
-from b3_geo.models import Planform, Airfoil, BladeConfig
-from b3_geo.core.blade import Blade
-from b3_geo.utils.cache import save_blade_sections
-from b3_geo.utils import plot_planform
 import logging
+from pathlib import Path
+
+import numpy as np
 from rich.logging import RichHandler
+
+from b3_geo.core.blade import Blade
+from b3_geo.models import Airfoil, BladeConfig, Planform
+from b3_geo.utils import plot_planform
+from b3_geo.utils.cache import save_blade_sections
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -84,7 +86,7 @@ def main():
     logger.info(f"Airfoil plot saved to {airfoil_plot_file}")
 
     # Compute and save blade sections to VTP
-    sections = blade.get_sections(blade.rel_span)
+    blade.get_sections(blade.rel_span)
     vtp_file = example_dir / "blended_naca_blade.vtp"
     save_blade_sections(blade, str(vtp_file))
     logger.info(f"Blade sections saved to {vtp_file}")

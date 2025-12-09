@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from statesman import Statesman
 
 
@@ -35,4 +36,9 @@ class LoftStep(Statesman):
             "workdir", "."
         )
         workdir = config_dir / workdir_str / "b3_geo"
-        process_loft(self.config_path, workdir=workdir, output_file=self.output_file, plot=self.plot)
+        process_loft(
+            self.config_path,
+            workdir=workdir,
+            output_file=self.output_file,
+            plot=self.plot,
+        )

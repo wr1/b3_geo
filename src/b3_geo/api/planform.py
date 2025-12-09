@@ -1,11 +1,14 @@
+from __future__ import annotations
+
 from pathlib import Path
-import yaml
+
 import numpy as np
-from typing import Union, Dict
+import yaml
+
 from b3_geo.utils.interpolation import (
+    cubic_interpolate,
     linear_interpolate,
     pchip_interpolate,
-    cubic_interpolate,
 )
 
 
@@ -27,7 +30,7 @@ def interpolate_planform(planform_data, npspan):
     return interp_plan
 
 
-def process_planform(config: Union[str, Path, Dict]) -> Dict:
+def process_planform(config: str | Path | dict) -> dict:
     """Process planform from config file or dict."""
     if isinstance(config, (str, Path)):
         config_data = yaml.safe_load(Path(config).read_text())
@@ -35,12 +38,13 @@ def process_planform(config: Union[str, Path, Dict]) -> Dict:
     elif isinstance(config, dict):
         planform_data = config.get("geometry", {}).get("planform", {})
     else:
-        raise ValueError("config must be path or dict")
+        msg = "config must be path or dict"
+        raise ValueError(msg)
     npspan = planform_data.get("npspan", 100)
     return interpolate_planform(planform_data, npspan)
 
 
-def plot_planform(config: Union[str, Path, Dict], output_file: str):
+def plot_planform(config: str | Path | dict, output_file: str):
     """Plot planform from config."""
     if isinstance(config, (str, Path)):
         config_data = yaml.safe_load(Path(config).read_text())
@@ -48,11 +52,14 @@ def plot_planform(config: Union[str, Path, Dict], output_file: str):
     elif isinstance(config, dict):
         planform_data = config.get("geometry", {}).get("planform", {})
     else:
-        raise ValueError("config must be path or dict")
+        msg = "config must be path or dict"
+        raise ValueError(msg)
     npspan = planform_data.get("npspan", 100)
     interp_plan = interpolate_planform(planform_data, npspan)
     controls = {
-        k: planform_data.get(k, []) for k in ['z', 'chord', 'thickness', 'twist', 'dx', 'dy']
+        k: planform_data.get(k, [])
+        for k in ["z", "chord", "thickness", "twist", "dx", "dy"]
     }
     from b3_geo.utils.plotting import plot_planform
+
     plot_planform(interp_plan, controls, interp_plan["rel_span"], output_file)

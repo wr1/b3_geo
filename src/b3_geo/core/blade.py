@@ -1,17 +1,23 @@
-import numpy as np
-from b3_geo.models import BladeConfig
-from b3_geo.utils.interpolation import (
-    linear_interpolate,
-    cubic_interpolate,
-    pchip_interpolate,
-    load_airfoil,
-    interpolate_airfoil,
-)
-from scipy.interpolate import interp1d
-from typing import Dict
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
+
 import matplotlib.pyplot as plt
+import numpy as np
 import pyvista as pv
+from scipy.interpolate import interp1d
+
+from b3_geo.utils.interpolation import (
+    cubic_interpolate,
+    interpolate_airfoil,
+    linear_interpolate,
+    load_airfoil,
+    pchip_interpolate,
+)
+
+if TYPE_CHECKING:
+    from b3_geo.models import BladeConfig
 
 
 class Blade:
@@ -22,14 +28,15 @@ class Blade:
         self.config = config
         self.np_chordwise = self.config.planform.npchord
         self._interpolate_planform()
-        self.airfoils_data: Dict[str, Dict] = {}
+        self.airfoils_data: dict[str, dict] = {}
         for af in self.config.airfoils:
             data = load_airfoil(af.path)
             self.airfoils_data[af.name] = {"data": data, "thickness": af.thickness}
         # Precompute interpolation functions for airfoils
         sorted_af = sorted(self.airfoils_data.values(), key=lambda d: d["thickness"])
         if len(sorted_af) == 0:
-            raise ValueError("No airfoils provided")
+            msg = "No airfoils provided"
+            raise ValueError(msg)
         self.t_sorted = np.array([d["thickness"] for d in sorted_af])
         interp_data = np.array(
             [interpolate_airfoil(d["data"], self.np_chordwise) for d in sorted_af]
@@ -73,7 +80,7 @@ class Blade:
         y_span = self.y_interp(self.thickness)
         return x_span, y_span
 
-    def get_planform_values(self, rel: float) -> Dict:
+    def get_planform_values(self, rel: float) -> dict:
         """Get interpolated planform values at a specific relative span."""
         return {
             "z": linear_interpolate(self.config.planform.z, [rel])[0],
@@ -88,7 +95,7 @@ class Blade:
             "dy": cubic_interpolate(self.config.planform.dy, [rel])[0],
         }
 
-    def get_planform_array(self, rels: np.ndarray) -> Dict[str, np.ndarray]:
+    def get_planform_array(self, rels: np.ndarray) -> dict[str, np.ndarray]:
         """Get interpolated planform values for an array of relative spans."""
         result = {
             "z": linear_interpolate(self.config.planform.z, rels),
@@ -109,12 +116,11 @@ class Blade:
         y = self.y_interp(thickness)
         if np.isscalar(thickness):
             return np.column_stack((x, y))
-        else:
-            return np.dstack((x, y))  # (np_chordwise, n, 2)
+        return np.dstack((x, y))  # (np_chordwise, n, 2)
 
     def plot_airfoils(self, thicknesses: np.ndarray, output_file: str):
         """Plot interpolated airfoils at given thicknesses."""
-        fig, ax = plt.subplots(figsize=(10, 8))
+        _fig, ax = plt.subplots(figsize=(10, 8))
         for t in thicknesses:
             xy = self.get_airfoil_xy_norm(t)
             ax.plot(xy[:, 0], xy[:, 1], label=f"Thickness {t:.2f}")

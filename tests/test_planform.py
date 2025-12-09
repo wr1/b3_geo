@@ -1,7 +1,6 @@
 import yaml
-import numpy as np
-from b3_geo.api.planform import interpolate_planform, process_planform, plot_planform
-from pathlib import Path
+
+from b3_geo.api.planform import interpolate_planform, plot_planform, process_planform
 
 
 def test_interpolate_planform():

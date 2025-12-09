@@ -1,11 +1,11 @@
-import sys
 import logging
+import sys
 from pathlib import Path
 
 from rich.logging import RichHandler
 
 sys.path.append(str(Path(__file__).parent.parent / "src"))
-from treeparse import cli, command, argument, option
+from treeparse import argument, cli, command, option
 
 logging.basicConfig(
     level=logging.INFO,
@@ -14,10 +14,9 @@ logging.basicConfig(
 )
 
 from .af import af_command
-from .loft import loft_command
 from .clean import clean_command
+from .loft import loft_command
 from .planform import planform_command
-
 
 app = cli(
     name="b3-geo",
@@ -103,8 +102,12 @@ app.commands.append(planform_cmd)
 
 def main():
     # If only one argument and it's not a command or flag, assume 'loft'
-    if len(sys.argv) == 2 and not sys.argv[1].startswith('-') and sys.argv[1] not in ['af', 'loft', 'clean', 'planform']:
-        sys.argv.insert(1, 'loft')
+    if (
+        len(sys.argv) == 2
+        and not sys.argv[1].startswith("-")
+        and sys.argv[1] not in ["af", "loft", "clean", "planform"]
+    ):
+        sys.argv.insert(1, "loft")
     app.run()
 
 

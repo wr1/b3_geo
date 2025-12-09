@@ -1,10 +1,12 @@
-import pyvista as pv
-import numpy as np
 from typing import TYPE_CHECKING
+
+import numpy as np
+import pyvista as pv
+
 from .interpolation import build_sections_poly
 
 if TYPE_CHECKING:
-    from ..core.blade import Blade
+    from src.b3_geo.core.blade import Blade
 
 
 def save_blade_sections(blade: "Blade", filepath: str, sections=None, rel_spans=None):
@@ -12,7 +14,9 @@ def save_blade_sections(blade: "Blade", filepath: str, sections=None, rel_spans=
     if sections is None:
         sections = blade.get_sections(blade.rel_span)
         rel_spans = blade.rel_span
-    grid = build_sections_poly(sections.reshape(-1, 3), blade.np_chordwise, sections.shape[0])
+    grid = build_sections_poly(
+        sections.reshape(-1, 3), blade.np_chordwise, sections.shape[0]
+    )
     grid.field_data["np_spanwise"] = [sections.shape[0]]
     grid.field_data["np_chordwise"] = [blade.np_chordwise]
     # Add point_data for planform parameters
@@ -37,9 +41,10 @@ def save_blade_sections(blade: "Blade", filepath: str, sections=None, rel_spans=
     lines = []
     n_sections = sections.shape[0]
     for i in range(n_sections):
-        line = [blade.np_chordwise] + list(
-            range(i * blade.np_chordwise, (i + 1) * blade.np_chordwise)
-        )
+        line = [
+            blade.np_chordwise,
+            *list(range(i * blade.np_chordwise, (i + 1) * blade.np_chordwise)),
+        ]
         lines.append(line)
     poly.lines = lines
     for k, v in grid.field_data.items():

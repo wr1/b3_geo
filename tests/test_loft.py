@@ -1,5 +1,7 @@
-import yaml
 import warnings
+
+import yaml
+
 from b3_geo.api.loft import process_loft
 
 warnings.filterwarnings("ignore", category=RuntimeWarning, module="scipy")

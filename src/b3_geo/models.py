@@ -1,16 +1,17 @@
+from __future__ import annotations
+
 from pydantic import BaseModel
-from typing import List, Tuple
 
 
 class Planform(BaseModel):
     """Planform parameters along the blade span."""
 
-    z: List[Tuple[float, float]]  # (rel_span, z_value)
-    chord: List[Tuple[float, float]]
-    thickness: List[Tuple[float, float]]
-    twist: List[Tuple[float, float]]
-    dx: List[Tuple[float, float]]
-    dy: List[Tuple[float, float]]
+    z: list[tuple[float, float]]  # (rel_span, z_value)
+    chord: list[tuple[float, float]]
+    thickness: list[tuple[float, float]]
+    twist: list[tuple[float, float]]
+    dx: list[tuple[float, float]]
+    dy: list[tuple[float, float]]
     npchord: int = 200
 
 
@@ -26,4 +27,4 @@ class BladeConfig(BaseModel):
     """Overall blade configuration."""
 
     planform: Planform
-    airfoils: List[Airfoil] = []
+    airfoils: list[Airfoil] = []

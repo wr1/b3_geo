@@ -1,6 +1,7 @@
 import warnings
+
 from b3_geo.core.blade import Blade
-from b3_geo.models import Planform, Airfoil, BladeConfig
+from b3_geo.models import Airfoil, BladeConfig, Planform
 from b3_geo.utils.cache import save_blade_sections
 
 warnings.filterwarnings("ignore", category=RuntimeWarning, module="scipy")
