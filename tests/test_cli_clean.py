@@ -1,5 +1,4 @@
 import yaml
-from pathlib import Path
 
 from b3_geo.cli.clean import clean_command
 
