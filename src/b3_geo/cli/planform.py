@@ -1,10 +1,11 @@
 from __future__ import annotations
+from pathlib import Path
 
 
-def planform_command(config_file: str, output: str | None = None):
+def planform_command(config_file, output=""):
     """Command to plot planform."""
-    if output is None:
-        output = "planform.png"
+    if output == "":
+        output = str(Path(config_file).parent / "planform.png")
     from src.b3_geo.api.planform import plot_planform
 
     plot_planform(config_file, output)

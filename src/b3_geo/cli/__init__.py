@@ -55,6 +55,7 @@ loft_cmd = command(
         option(
             flags=["--file", "-f"],
             arg_type=str,
+            default="",
             help="Output file path.",
         ),
         option(
@@ -93,6 +94,7 @@ planform_cmd = command(
         option(
             flags=["--output", "-o"],
             arg_type=str,
+            default="",
             help="Output file path.",
         ),
     ],

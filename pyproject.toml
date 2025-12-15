@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "b3-geo"
 version = "0.1.1"
 description = "Blade geometry generation"
-authors = [{name = "Your Name"}]
+authors = [{name = "wr1"}]
 dependencies = [
     "numpy",
     "scipy",
@@ -16,7 +16,7 @@ dependencies = [
     "pyyaml",
     "rich",
     "treeparse",
-    "statesman",
+    "statesman @ git+https://github.com/wr1/statesman.git",
 ]
 
 [project.scripts]
@@ -37,3 +37,8 @@ dev-dependencies = [
     "mkdocs",
     "mkdocs-material",
 ]
+
+
+
+[tool.hatch.metadata]
+allow-direct-references = true
