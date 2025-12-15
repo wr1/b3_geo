@@ -6,6 +6,6 @@ def planform_command(config_file, output=""):
     """Command to plot planform."""
     if output == "":
         output = str(Path(config_file).parent / "planform.png")
-    from src.b3_geo.api.planform import plot_planform
+    from b3_geo.api.planform import plot_planform
 
     plot_planform(config_file, output)

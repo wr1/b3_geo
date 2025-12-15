@@ -6,7 +6,7 @@ import pyvista as pv
 from .interpolation import build_sections_poly
 
 if TYPE_CHECKING:
-    from src.b3_geo.core.blade import Blade
+    from b3_geo.core.blade import Blade
 
 
 def save_blade_sections(blade: "Blade", filepath: str, sections=None, rel_spans=None):

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from src.b3_geo.api.loft_step import LoftStep
+from b3_geo.api.loft_step import LoftStep
 
 
 def loft_command(config_file, file="", force=False, plot=True):
