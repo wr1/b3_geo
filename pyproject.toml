@@ -34,8 +34,6 @@ ignore = ["S101", "S104", "COM812", "ISC001"]
 dev-dependencies = [
     "pytest",
     "ruff",
-    "mkdocs",
-    "mkdocs-material",
 ]
 
 
