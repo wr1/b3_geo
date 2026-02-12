@@ -104,11 +104,11 @@ def process_loft(
         planform_plot_file = workdir / "planform.png"
         plot_planform_from_blade(blade, controls, str(planform_plot_file))
         logger.info(f"Saved planform plot to {planform_plot_file}")
-    # Create sections at mesh.z positions
+    # Create sections at mesh.z positions for 2D mesh
     mesh_data = config_data.get("mesh", {})
-    mesh_z_config = mesh_data.get("z", [])
     sections_mesh = None
-    if mesh_z_config:
+    if mesh_data.get("z"):
+        mesh_z_config = mesh_data.get("z", [])
         mesh_z = expand_mesh_z(mesh_z_config)
         logger.info(f"Mesh z values: {[float(z) for z in mesh_z]}")
         rels_mesh = np.array([blade.z_to_rel(z) for z in mesh_z])
@@ -117,7 +117,21 @@ def process_loft(
         save_blade_sections(
             blade, str(mesh_vtp_file), sections=sections_mesh, rel_spans=rels_mesh
         )
-        logger.info(f"Saved mesh sections to {mesh_vtp_file}")
+        logger.info(f"Saved 2D mesh sections to {mesh_vtp_file}")
+    # Create sections at mesh3d.z positions for 3D mesh
+    mesh3d_data = config_data.get("mesh3d", {})
+    sections_mesh3d = None
+    if mesh3d_data.get("z"):
+        mesh3d_z_config = mesh3d_data.get("z", [])
+        mesh3d_z = expand_mesh_z(mesh3d_z_config)
+        logger.info(f"Mesh3D z values: {[float(z) for z in mesh3d_z]}")
+        rels_mesh3d = np.array([blade.z_to_rel(z) for z in mesh3d_z])
+        sections_mesh3d = blade.get_sections(rels_mesh3d)
+        mesh3d_vtp_file = workdir / "lm1_mesh3d.vtp"
+        save_blade_sections(
+            blade, str(mesh3d_vtp_file), sections=sections_mesh3d, rel_spans=rels_mesh3d
+        )
+        logger.info(f"Saved 3D mesh sections to {mesh3d_vtp_file}")
     logger.info("Loft step completed")
     elapsed = time.time() - start_time
     logger.info(f"Loft step took {elapsed:.2f} seconds")

@@ -14,10 +14,12 @@ class LoftStep(Statesman):
         self.output_file = output_file
         self.plot = plot
         self.force = False
-        # Conditionally set output_files based on presence of mesh config
+        # Conditionally set output_files based on presence of mesh or mesh3d config
         self.output_files = ["b3_geo/planform.png"]
         if "mesh" in self.config and self.config["mesh"].get("z"):
             self.output_files.append("b3_geo/lm1_mesh.vtp")
+        if "mesh3d" in self.config and self.config["mesh3d"].get("z"):
+            self.output_files.append("b3_geo/lm1_mesh3d.vtp")
 
     def run(self, force=False):
         self.force = force
