@@ -7,7 +7,7 @@ class LoftStep(Statesman):
     """Step for processing loft with statesman dependency management."""
 
     workdir_key = "workdir"
-    dependent_sections = ["geometry", "airfoils"]
+    dependent_sections = ["geometry", "airfoils", "mesh", "mesh3d"]
 
     def __init__(self, config_path, output_file=None, plot=True):
         super().__init__(config_path)
