@@ -1,10 +1,10 @@
 from pathlib import Path
 
-from statesman import Statesman
+from b3_state import b3_state
 
 
-class AFStep(Statesman):
-    """Step for processing airfoils with statesman dependency management."""
+class AFStep(b3_state):
+    """Step for processing airfoils with b3_state dependency management."""
 
     workdir_key = "workdir"
     dependent_sections = ["airfoils", "geometry"]

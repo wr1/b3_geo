@@ -1,10 +1,10 @@
 from pathlib import Path
 
-from statesman import Statesman
+from b3_state import b3_state
 
 
-class LoftStep(Statesman):
-    """Step for processing loft with statesman dependency management."""
+class LoftStep(b3_state):
+    """Step for processing loft with b3_state dependency management."""
 
     workdir_key = "workdir"
     dependent_sections = ["geometry", "airfoils", "mesh", "mesh3d"]
