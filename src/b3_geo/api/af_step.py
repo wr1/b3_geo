@@ -3,7 +3,7 @@ from pathlib import Path
 from b3_state import b3_state
 
 
-class AFStep(b3_state):
+class af_step(b3_state):
     """Step for processing airfoils with b3_state dependency management."""
 
     workdir_key = "workdir"

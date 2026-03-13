@@ -1,6 +1,6 @@
 import yaml
 
-from b3_geo.api.loft_step import LoftStep
+from b3_geo.api.loft_step import loft_step
 
 
 def test_loft_step(tmp_path):
@@ -27,9 +27,9 @@ def test_loft_step(tmp_path):
     airfoil_file = tmp_path / "airfoil.dat"
     airfoil_file.write_text("# header\n0.0 0.0\n0.5 0.1\n1.0 0.0\n")
 
-    step = LoftStep(str(config_file))
+    step = loft_step(str(config_file))
     assert step.workdir_key == "workdir"
-    assert step.dependent_sections == ["geometry", "airfoils"]
+    assert step.dependent_sections == ["geometry", "airfoils", "mesh", "mesh3d"]
     assert len(step.output_files) == 2
     assert step.output_file is None
     assert step.plot is True

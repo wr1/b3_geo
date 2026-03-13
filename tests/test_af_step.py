@@ -1,6 +1,6 @@
 import yaml
 
-from b3_geo.api.af_step import AFStep
+from b3_geo.api.af_step import af_step
 
 
 def test_af_step(tmp_path):
@@ -27,7 +27,7 @@ def test_af_step(tmp_path):
     airfoil_file = tmp_path / "airfoil.dat"
     airfoil_file.write_text("# header\n0.0 0.0\n0.5 0.1\n1.0 0.0\n")
 
-    step = AFStep(str(config_file))
+    step = af_step(str(config_file))
     step.run()
 
     workdir = tmp_path / "b3_geo"

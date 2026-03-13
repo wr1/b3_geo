@@ -3,7 +3,7 @@ from pathlib import Path
 from b3_state import b3_state
 
 
-class LoftStep(b3_state):
+class loft_step(b3_state):
     """Step for processing loft with b3_state dependency management."""
 
     workdir_key = "workdir"
