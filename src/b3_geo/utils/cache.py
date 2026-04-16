@@ -1,0 +1,59 @@
+from typing import TYPE_CHECKING
+
+import numpy as np
+import pyvista as pv
+
+from .interpolation import build_sections_poly
+
+if TYPE_CHECKING:
+    from b3_geo.core.blade import Blade
+
+
+def save_blade_sections(blade: "Blade", filepath: str, sections=None, rel_spans=None):
+    """Save blade sections to VTP with planform data."""
+    if sections is None:
+        sections = blade.get_sections(blade.rel_span)
+        rel_spans = blade.rel_span
+    grid = build_sections_poly(
+        sections.reshape(-1, 3), blade.np_chordwise, sections.shape[0]
+    )
+    grid.field_data["np_spanwise"] = [sections.shape[0]]
+    grid.field_data["np_chordwise"] = [blade.np_chordwise]
+    # Add point_data for planform parameters
+    vals = blade.get_planform_array(rel_spans)
+    for k in [
+        "rel_span",
+        "z",
+        "chord",
+        "thickness",
+        "absolute_thickness",
+        "twist",
+        "dx",
+        "dy",
+    ]:
+        if k == "rel_span":
+            grid.point_data[k] = np.repeat(rel_spans, blade.np_chordwise)
+        else:
+            grid.point_data[k] = np.repeat(vals[k], blade.np_chordwise)
+    # Convert to PolyData for VTP
+    poly = pv.PolyData()
+    poly.points = sections.reshape(-1, 3)
+    lines = []
+    n_sections = sections.shape[0]
+    for i in range(n_sections):
+        line = [
+            blade.np_chordwise,
+            *list(range(i * blade.np_chordwise, (i + 1) * blade.np_chordwise)),
+        ]
+        lines.append(line)
+    poly.lines = lines
+    for k, v in grid.field_data.items():
+        poly.field_data[k] = v
+    for k, v in grid.point_data.items():
+        poly.point_data[k] = v
+    # Add t coordinate
+    t = np.linspace(0, 1, blade.np_chordwise)
+    poly.point_data["t"] = np.tile(t, n_sections)
+    # Add section_id
+    poly.point_data["section_id"] = np.repeat(np.arange(n_sections), blade.np_chordwise)
+    poly.save(filepath)
