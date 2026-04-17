@@ -8,7 +8,7 @@ from .af import af_command
 from .clean import clean_command
 from .loft import loft_command
 from .planform import planform_command
-from b3m.log import setup_logging
+from b3_cli.log import setup_logging
 
 setup_logging()
 
