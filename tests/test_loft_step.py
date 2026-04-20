@@ -29,11 +29,8 @@ def test_loft_step(tmp_path):
 
     step = loft_step(str(config_file))
     assert step.workdir_key == "workdir"
-    assert step.dependent_sections == ["geometry", "airfoils", "mesh", "mesh3d"]
-    assert len(step.output_files) == 2
     assert step.output_file is None
     assert step.plot is True
-    assert step.force is False
     step.run()
 
     workdir = tmp_path / "b3_geo"

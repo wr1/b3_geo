@@ -32,7 +32,7 @@ af_cmd = command(
         option(
             flags=["--force", "-F"],
             arg_type=bool,
-            help="Force rerun despite b3_state checks.",
+            help="Force rerun.",
         ),
     ],
 )
@@ -55,7 +55,7 @@ loft_cmd = command(
         option(
             flags=["--force", "-F"],
             arg_type=bool,
-            help="Force rerun despite b3_state checks.",
+            help="Force rerun.",
         ),
         option(
             flags=["--plot", "-p"],
