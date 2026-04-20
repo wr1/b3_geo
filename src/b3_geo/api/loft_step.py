@@ -1,34 +1,25 @@
+import logging
 from pathlib import Path
 
-from b3_state import b3_state
+import ruamel.yaml as yaml
 
 
-class loft_step(b3_state):
-    """Step for processing loft with b3_state dependency management."""
-
+class loft_step:
     workdir_key = "workdir"
-    dependent_sections = ["geometry", "airfoils", "mesh", "mesh3d"]
 
     def __init__(self, config_path, output_file=None, plot=True):
-        super().__init__(config_path)
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.config_path = Path(config_path).resolve()
+        with open(self.config_path, encoding="utf-8") as f:
+            self.config = yaml.YAML().load(f)
+        workdir_str = self.config.get(self.workdir_key, ".")
+        self.workdir = (self.config_path.parent / Path(workdir_str)).resolve()
+        self.workdir.mkdir(parents=True, exist_ok=True)
         self.output_file = output_file
         self.plot = plot
-        self.force = False
-        # Conditionally set output_files based on presence of mesh or mesh3d config
-        self.output_files = ["b3_geo/planform.png"]
-        if "mesh" in self.config and self.config["mesh"].get("z"):
-            self.output_files.append("b3_geo/lm1_mesh.vtp")
-        if "mesh3d" in self.config and self.config["mesh3d"].get("z"):
-            self.output_files.append("b3_geo/lm1_mesh3d.vtp")
 
     def run(self, force=False):
-        self.force = force
-        super().run()
-
-    def needs_run(self):
-        if self.force:
-            return True
-        return super().needs_run()
+        self._execute()
 
     def _execute(self):
         from .loft import process_loft

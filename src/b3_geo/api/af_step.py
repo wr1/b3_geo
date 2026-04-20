@@ -1,27 +1,23 @@
+import logging
 from pathlib import Path
 
-from b3_state import b3_state
+import ruamel.yaml as yaml
 
 
-class af_step(b3_state):
-    """Step for processing airfoils with b3_state dependency management."""
-
+class af_step:
     workdir_key = "workdir"
-    dependent_sections = ["airfoils", "geometry"]
-    output_files = ["b3_geo/airfoils.png", "b3_geo/airfoils.npz"]
 
     def __init__(self, config_path):
-        super().__init__(config_path)
-        self.force = False
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.config_path = Path(config_path).resolve()
+        with open(self.config_path, encoding="utf-8") as f:
+            self.config = yaml.YAML().load(f)
+        workdir_str = self.config.get(self.workdir_key, ".")
+        self.workdir = (self.config_path.parent / Path(workdir_str)).resolve()
+        self.workdir.mkdir(parents=True, exist_ok=True)
 
     def run(self, force=False):
-        self.force = force
-        super().run()
-
-    def needs_run(self):
-        if self.force:
-            return True
-        return super().needs_run()
+        self._execute()
 
     def _execute(self):
         from .af import process_af
