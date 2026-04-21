@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import numpy as np
-import pyvista as pv
 from pathlib import Path
 from scipy.interpolate import CubicSpline, PchipInterpolator
 
@@ -203,8 +202,9 @@ def eval_curve(
 
 def build_sections_poly(
     points: np.ndarray, np_chordwise: int, np_spanwise: int
-) -> pv.StructuredGrid:
+):
     """Build structured grid for blade sections."""
+    import pyvista as pv
     grid = pv.StructuredGrid()
     grid.points = points
     grid.dimensions = (np_chordwise, np_spanwise, 1)
