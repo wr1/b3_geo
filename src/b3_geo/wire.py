@@ -60,8 +60,19 @@ def build_wire(
     poly.lines  = lines
 
     # point_data (M points, excluding the closing duplicate)
-    poly.point_data["geo.abs_t"]  = np.append(abs_t, abs_t[0]).astype(np.float64)
-    poly.point_data["geo.rel_t"]  = np.append(rel_t, rel_t[0]).astype(np.float64)
+    abs_t_closed = np.append(abs_t, abs_t[0]).astype(np.float64)
+    rel_t_closed = np.append(rel_t, rel_t[0]).astype(np.float64)
+    total_arc    = float(abs_t[-1])
+    poly.point_data["geo.abs_t"] = abs_t_closed
+    poly.point_data["geo.rel_t"] = rel_t_closed
+    # Derived TE-distance fields. SS TE is at t=0 (start of the polyline),
+    # PS TE is at t=1 (end). Both are arc distances along the wire, valid
+    # at every point — "from PS TE" just traverses the other way around.
+    poly.point_data["geo.arc_from_te_ss"] = abs_t_closed
+    poly.point_data["geo.arc_from_te_ps"] = (total_arc - abs_t_closed).astype(np.float64)
+    poly.point_data["geo.t_from_te_ss"]   = rel_t_closed
+    poly.point_data["geo.t_from_te_ps"]   = (1.0 - rel_t_closed).astype(np.float64)
+
     uacs_closed  = np.vstack([uacs,  uacs[[0]]]).astype(np.float64)
     sdacs_closed = np.vstack([sdacs, sdacs[[0]]]).astype(np.float64)
     poly.point_data["geo.uacs"]   = uacs_closed

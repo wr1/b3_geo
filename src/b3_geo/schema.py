@@ -7,6 +7,13 @@ import pyvista as pv
 W_VTK_POINT_DATA: dict[str, dict] = {
     "geo.abs_t": {"shape": "(N,)",   "dtype": "float64"},
     "geo.rel_t": {"shape": "(N,)",   "dtype": "float64"},
+    # Derived TE-distance fields. arc_from_te_ss == abs_t (alias for clarity);
+    # arc_from_te_ps == total_arc - abs_t (arc length going the other way);
+    # t_from_te_* are the normalized [0,1] versions.
+    "geo.arc_from_te_ss": {"shape": "(N,)", "dtype": "float64"},
+    "geo.arc_from_te_ps": {"shape": "(N,)", "dtype": "float64"},
+    "geo.t_from_te_ss":   {"shape": "(N,)", "dtype": "float64"},
+    "geo.t_from_te_ps":   {"shape": "(N,)", "dtype": "float64"},
     "geo.uacs":  {"shape": "(N, 2)", "dtype": "float64"},
     "geo.sdacs": {"shape": "(N, 2)", "dtype": "float64"},
     # per-section scalars broadcast to point_data so ParaView can colour by them

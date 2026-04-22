@@ -48,7 +48,10 @@ def build_w_vtk(
     poly.lines  = all_lines
 
     # point_data — flat across all wires
-    scalar_keys = ("geo.abs_t", "geo.rel_t", "geo.s", "geo.z", "geo.chord",
+    scalar_keys = ("geo.abs_t", "geo.rel_t",
+                   "geo.arc_from_te_ss", "geo.arc_from_te_ps",
+                   "geo.t_from_te_ss", "geo.t_from_te_ps",
+                   "geo.s", "geo.z", "geo.chord",
                    "geo.twist", "geo.tc", "geo.dx", "geo.dy")
     for key in scalar_keys:
         poly.point_data[key] = np.concatenate(
