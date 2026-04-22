@@ -51,6 +51,7 @@ def build_w_vtk(
     scalar_keys = ("geo.abs_t", "geo.rel_t",
                    "geo.arc_from_te_ss", "geo.arc_from_te_ps",
                    "geo.t_from_te_ss", "geo.t_from_te_ps",
+                   "geo.signed_arc_from_le",
                    "geo.s", "geo.z", "geo.chord",
                    "geo.twist", "geo.tc", "geo.dx", "geo.dy")
     for key in scalar_keys:

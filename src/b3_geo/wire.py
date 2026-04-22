@@ -73,6 +73,29 @@ def build_wire(
     poly.point_data["geo.t_from_te_ss"]   = rel_t_closed
     poly.point_data["geo.t_from_te_ps"]   = (1.0 - rel_t_closed).astype(np.float64)
 
+    # Signed arc distance from the LE. Negative on the suction side, zero at
+    # the LE, positive on the pressure side. Lets an iso HardpointHint at
+    # value 0 imprint a node at the LE.
+    #
+    # The LE is the minimum of uacs[:,0] (chord coord); that's a clean
+    # parabolic minimum at x=0, far more stable across sections than the
+    # max-thickness argmax (which wanders by ~30% chord depending on
+    # airfoil shape). A 3-point parabolic fit gives sub-pixel rel_t so the
+    # LE hardpoint location is continuous in span.
+    i_le = int(np.argmin(uacs[:, 0]))
+    if 0 < i_le < len(uacs) - 1:
+        x0, x1, x2 = float(uacs[i_le - 1, 0]), float(uacs[i_le, 0]), float(uacs[i_le + 1, 0])
+        denom = x0 - 2.0 * x1 + x2
+        if abs(denom) > 1e-14:
+            # Vertex offset in index-space; then map to abs_t via same-index spacing
+            shift = 0.5 * (x0 - x2) / denom
+            abs_t_le = float(abs_t[i_le]) + shift * 0.5 * (float(abs_t[i_le + 1]) - float(abs_t[i_le - 1]))
+        else:
+            abs_t_le = float(abs_t[i_le])
+    else:
+        abs_t_le = float(abs_t[i_le])
+    poly.point_data["geo.signed_arc_from_le"] = (abs_t_closed - abs_t_le).astype(np.float64)
+
     uacs_closed  = np.vstack([uacs,  uacs[[0]]]).astype(np.float64)
     sdacs_closed = np.vstack([sdacs, sdacs[[0]]]).astype(np.float64)
     poly.point_data["geo.uacs"]   = uacs_closed

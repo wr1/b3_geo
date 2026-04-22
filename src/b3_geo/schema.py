@@ -14,6 +14,7 @@ W_VTK_POINT_DATA: dict[str, dict] = {
     "geo.arc_from_te_ps": {"shape": "(N,)", "dtype": "float64"},
     "geo.t_from_te_ss":   {"shape": "(N,)", "dtype": "float64"},
     "geo.t_from_te_ps":   {"shape": "(N,)", "dtype": "float64"},
+    "geo.signed_arc_from_le": {"shape": "(N,)", "dtype": "float64"},
     "geo.uacs":  {"shape": "(N, 2)", "dtype": "float64"},
     "geo.sdacs": {"shape": "(N, 2)", "dtype": "float64"},
     # per-section scalars broadcast to point_data so ParaView can colour by them
