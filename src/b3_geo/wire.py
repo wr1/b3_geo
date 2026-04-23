@@ -72,6 +72,13 @@ def build_wire(
     poly.point_data["geo.arc_from_te_ps"] = (total_arc - abs_t_closed).astype(np.float64)
     poly.point_data["geo.t_from_te_ss"]   = rel_t_closed
     poly.point_data["geo.t_from_te_ps"]   = (1.0 - rel_t_closed).astype(np.float64)
+    # Symmetric arc distance from the nearer TE side — an IsoWeb iso-level
+    # drawn on this field crosses both sides of the airfoil at the same
+    # distance from TE, which is what a TE bondline cavity iso needs.
+    poly.point_data["geo.arc_from_te"] = np.minimum(
+        poly.point_data["geo.arc_from_te_ss"],
+        poly.point_data["geo.arc_from_te_ps"],
+    ).astype(np.float64)
 
     # Signed arc distance from the LE. Negative on the suction side, zero at
     # the LE, positive on the pressure side. Lets an iso HardpointHint at

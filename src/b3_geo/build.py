@@ -49,7 +49,7 @@ def build_w_vtk(
 
     # point_data — flat across all wires
     scalar_keys = ("geo.abs_t", "geo.rel_t",
-                   "geo.arc_from_te_ss", "geo.arc_from_te_ps",
+                   "geo.arc_from_te", "geo.arc_from_te_ss", "geo.arc_from_te_ps",
                    "geo.t_from_te_ss", "geo.t_from_te_ps",
                    "geo.signed_arc_from_le",
                    "geo.s", "geo.z", "geo.chord",
