@@ -117,6 +117,9 @@ def build_wire(
         ("geo.twist", twist), ("geo.tc", tc), ("geo.dx", dx), ("geo.dy", dy),
     ):
         poly.point_data[key] = np.full(n_pts, val, dtype=np.float64)
+    # Plain name alias for consumers (load apply filters, etc.) that expect
+    # "rel_span" rather than the dotted "geo.s".
+    poly.point_data["rel_span"] = np.full(n_pts, s, dtype=np.float64)
 
     return poly
 

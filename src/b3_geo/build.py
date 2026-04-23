@@ -53,7 +53,8 @@ def build_w_vtk(
                    "geo.t_from_te_ss", "geo.t_from_te_ps",
                    "geo.signed_arc_from_le",
                    "geo.s", "geo.z", "geo.chord",
-                   "geo.twist", "geo.tc", "geo.dx", "geo.dy")
+                   "geo.twist", "geo.tc", "geo.dx", "geo.dy",
+                   "rel_span")
     for key in scalar_keys:
         poly.point_data[key] = np.concatenate(
             [w.point_data[key] for w in wires]

@@ -25,6 +25,9 @@ W_VTK_POINT_DATA: dict[str, dict] = {
     "geo.tc":    {"shape": "(N,)",   "dtype": "float64"},
     "geo.dx":    {"shape": "(N,)",   "dtype": "float64"},
     "geo.dy":    {"shape": "(N,)",   "dtype": "float64"},
+    # Plain alias for "geo.s" — consumers (load apply filters, etc.) that
+    # expect a coordinate field named "rel_span" can use this directly.
+    "rel_span":  {"shape": "(N,)",   "dtype": "float64"},
 }
 
 W_VTK_FIELD_DATA: dict[str, dict] = {
