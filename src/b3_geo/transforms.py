@@ -20,7 +20,7 @@ from __future__ import annotations
 import numpy as np
 
 
-# ── 3×3 building blocks ─────────────────────────────────────────────────────
+# ── 3x3 building blocks ─────────────────────────────────────────────────────
 
 def R3_axial_rot(theta_rad: float) -> np.ndarray:
     """Rotation about SDACS axis 3 (axial) by ``theta_rad``.
@@ -39,7 +39,7 @@ def R3_sdacs_to_gxlocal() -> np.ndarray:
 
     The matrix P satisfies v_gx = P · v_sdacs. Equivalently, applied to
     a 6-vector with block-diag (P, P), this is the integer permutation
-    σ = (2, 1, 0, 5, 4, 3): K_gx[i,j] = K_anba[σ(i), σ(j)].
+    sigma = (2, 1, 0, 5, 4, 3): K_gx[i,j] = K_anba[sigma(i), sigma(j)].
     """
     return np.array([[0.0, 0.0, 1.0],
                      [0.0, 1.0, 0.0],
@@ -58,10 +58,10 @@ def R3_about_e1(theta_rad: float) -> np.ndarray:
                      [0.0, s,   c]], dtype=np.float64)
 
 
-# ── 6×6 lift ────────────────────────────────────────────────────────────────
+# ── 6x6 lift ────────────────────────────────────────────────────────────────
 
 def T6_block(R3: np.ndarray) -> np.ndarray:
-    """Lift a 3×3 rotation to the 6-DOF block-diagonal transform
+    """Lift a 3x3 rotation to the 6-DOF block-diagonal transform
     block_diag(R3, R3) — applies R3 identically to forces (top 3) and
     moments (bottom 3) of a 6-DOF stiffness/mass matrix.
     """
@@ -72,7 +72,7 @@ def T6_block(R3: np.ndarray) -> np.ndarray:
 
 
 def K_anba_to_gxlocal(K_anba: np.ndarray, twist_rad: float) -> np.ndarray:
-    """Strict 6×6 transform: SDACS ANBA stiffness/mass matrix → GXBeam
+    """Strict 6x6 transform: SDACS ANBA stiffness/mass matrix → GXBeam
     element-local matrix.
 
     Only the constant axis rename is applied here::
@@ -81,11 +81,11 @@ def K_anba_to_gxlocal(K_anba: np.ndarray, twist_rad: float) -> np.ndarray:
 
     where ``T_axes = block_diag(P, P)`` with ``P = R3_sdacs_to_gxlocal()``
     sends SDACS [chord, thick, axial] → GX [axial, thick, chord]. At
-    twist=0 this is the integer permutation σ=(2,1,0,5,4,3), which is the
+    twist=0 this is the integer permutation sigma=(2,1,0,5,4,3), which is the
     *strict* DOF reordering — the consistent block-diagonal axis rename.
     The previously-shipped empirical permutation [2,1,0,5,3,4] is **not**
     block-diagonal: forces with e2=thick, moments with e2=chord, which
-    manifests as ~4× edge-bending softness in beam-vs-shell comparisons.
+    manifests as ~4x edge-bending softness in beam-vs-shell comparisons.
 
     Twist is *not* applied to K. It is encoded in the per-element world
     frame ``F_e`` (which has columns ``(tangent, thick_world(θ),
@@ -103,13 +103,20 @@ def K_anba_to_gxlocal(K_anba: np.ndarray, twist_rad: float) -> np.ndarray:
     return T_axes @ np.asarray(K_anba, dtype=np.float64) @ T_axes.T
 
 
-def uacs_to_sdacs(uacs: np.ndarray, chord: float) -> np.ndarray:
+def uacs_to_sdacs(uacs: np.ndarray, chord: float, twist_axis: float = 0.5) -> np.ndarray:
     """UACS (M, 2) → SDACS (M, 2).
 
-    x -= 0.5 to centre at mid-chord, then scale both cols by chord.
+    ``x -= twist_axis`` puts the SDACS origin on the twist axis — the chord
+    fraction the section twist rotates about — then scale both cols by chord.
+    ``twist_axis`` defaults to 0.5 (mid-chord), the historical behaviour, and is
+    overridable per section (e.g. the MAC ``DEF SHAPE`` chord offset, which
+    migrates from 0.5 at the root toward ~0.3 outboard). ``sdacs_to_gbcs``
+    rotates about the SDACS origin, so this is what makes twist pivot about the
+    twist axis instead of mid-chord. (Not "pitch axis" — pitch turns the whole
+    blade; this is the per-section twist pivot.)
     """
     sdacs = uacs.copy()
-    sdacs[:, 0] -= 0.5
+    sdacs[:, 0] -= twist_axis
     sdacs *= chord
     return sdacs
 
@@ -162,8 +169,8 @@ def gbcs_to_sdacs(
     return np.column_stack([c, t])
 
 
-def sdacs_to_uacs(sdacs: np.ndarray, chord: float) -> np.ndarray:
+def sdacs_to_uacs(sdacs: np.ndarray, chord: float, twist_axis: float = 0.5) -> np.ndarray:
     """Inverse of uacs_to_sdacs (round-trip testing only)."""
     uacs = sdacs / chord
-    uacs[:, 0] += 0.5
+    uacs[:, 0] += twist_axis
     return uacs

@@ -38,9 +38,10 @@ def build_wire(
     dx    = float(planform.dx.at(s_arr)[0])
     dy    = float(planform.dy.at(s_arr)[0])
     z     = float(planform.z.at(s_arr)[0])
+    twist_axis = float(planform.twist_axis.at(s_arr)[0])  # chord frac twist pivots about
 
     uacs  = _uacs_at(airfoil_stack, tc, n_chord)          # (M, 2)
-    sdacs = uacs_to_sdacs(uacs, chord)                     # (M, 2)
+    sdacs = uacs_to_sdacs(uacs, chord, twist_axis)         # (M, 2)
     gbcs  = sdacs_to_gbcs(sdacs, twist, dx, dy, z)        # (M, 3)
 
     # arc length in SDACS (physical units)
