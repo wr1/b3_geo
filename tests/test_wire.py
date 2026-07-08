@@ -88,3 +88,32 @@ def test_gbcs_z_matches_field_data():
     w = build_wire(_planform(), _stack(), s=0.5, n_chord=50)
     z_field = float(w.field_data["geo.z"][0])
     np.testing.assert_allclose(w.points[:, 2], z_field, atol=1e-10)
+
+
+def _section_tc(w) -> float:
+    uacs = w.point_data["geo.uacs"]
+    return float(uacs[:, 1].max() - uacs[:, 1].min())
+
+
+def test_tc_stack_blends_by_tc_curve():
+    """Default (placement='tc'): section thickness follows planform.tc(s),
+    not the nominal rel_span keys — the legacy contract stays intact."""
+    pf = _planform()
+    w = build_wire(pf, _stack(), s=0.25, n_chord=200)
+    # planform tc at s=0.25 ~ 0.24; nearest-span foil (n18@0.5) has tc 0.18.
+    assert _section_tc(w) == pytest.approx(float(pf.tc.at(0.25)), abs=0.02)
+
+
+def test_span_stack_places_non_min_tc_tip_at_tip():
+    """placement='span': a tip foil whose t/c is NOT the global minimum stays
+    at the tip instead of being t/c-injected mid-span (the MAC import bug)."""
+    root = naca4("0025"); root.metadata["thickness"] = 0.25
+    thin = naca4("0012"); thin.metadata["thickness"] = 0.12   # global-min t/c
+    tip  = naca4("0018"); tip.metadata["thickness"] = 0.18    # tip, not the min
+    stack = AirfoilStack([(0.0, root), (0.6, thin), (1.0, tip)], placement="span")
+    pf = _planform()   # pf.tc(1.0)=0.15 — irrelevant in span mode
+    w_tip = build_wire(pf, stack, s=1.0, n_chord=200)
+    assert _section_tc(w_tip) == pytest.approx(0.18, abs=0.01)   # tip foil, not thin
+    # and the thin foil governs where it was placed (mid-span), not the tip
+    w_mid = build_wire(pf, stack, s=0.6, n_chord=200)
+    assert _section_tc(w_mid) == pytest.approx(0.12, abs=0.01)

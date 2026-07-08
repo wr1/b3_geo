@@ -40,7 +40,7 @@ def build_wire(
     z     = float(planform.z.at(s_arr)[0])
     twist_axis = float(planform.twist_axis.at(s_arr)[0])  # chord frac twist pivots about
 
-    uacs  = _uacs_at(airfoil_stack, tc, n_chord)          # (M, 2)
+    uacs  = _uacs_at(airfoil_stack, s, tc, n_chord)       # (M, 2) — axis per stack.placement
     sdacs = uacs_to_sdacs(uacs, chord, twist_axis)         # (M, 2)
     gbcs  = sdacs_to_gbcs(sdacs, twist, dx, dy, z)        # (M, 3)
 
@@ -132,40 +132,58 @@ def build_wire(
     return poly
 
 
-def _uacs_at(stack: AirfoilStack, tc: float, n_chord: int) -> np.ndarray:
-    """Return UACS coords (n_chord, 2) for the airfoil nearest to tc, repanelled.
+def _uacs_at(stack: AirfoilStack, s: float, tc: float, n_chord: int) -> np.ndarray:
+    """Return UACS coords (n_chord, 2) for the section at rel-span s, repanelled.
 
     UACS convention: col 0 = chord [0,1], col 1 = thickness (suction +y).
-    Interpolates across the stack's t/c axis using interp1d (linear, clamp).
+    The interpolation axis is chosen by ``stack.placement``:
+
+      - ``"tc"`` (default, legacy): blend across the stack's t/c axis, evaluated
+        at ``tc`` (= ``planform.tc.at(s)``). The planform t/c curve is the
+        single source of section thickness; rel_span keys are nominal.
+      - ``"span"``: blend across the stack's authoritative rel_span axis at
+        ``s``, so explicit placement (MAC ``PLACE SHAPE`` z / a designated tip)
+        is honoured verbatim and a non-min-t/c tip is not injected mid-span.
+
+    interp1d is linear and clamps to the root/tip foil outside the axis range.
+    ``AirfoilStack.__post_init__`` guarantees entries sorted & unique by span.
     """
     entries = stack.entries
 
-    def _tc_of(entry: tuple) -> float:
-        foil = entry[1]
-        if "thickness" in foil.metadata:
-            return float(foil.metadata["thickness"])
-        return float(entry[0])
-
-    sorted_entries = sorted(entries, key=_tc_of)
-    tcs_arr = np.array([_tc_of(e) for e in sorted_entries])
-
     xs_list, ys_list = [], []
-    for _, foil in sorted_entries:
+    for _, foil in entries:
         xy = _repanel_uacs(foil.xy, n_chord)
         xs_list.append(xy[:, 0])
         ys_list.append(xy[:, 1])
-
     x_all = np.stack(xs_list, axis=1)  # (n_chord, n_entries)
     y_all = np.stack(ys_list, axis=1)
 
-    x_interp = interp1d(tcs_arr, x_all, axis=1, bounds_error=False,
+    if len(entries) == 1:              # interp1d needs >= 2 samples
+        return np.column_stack([x_all[:, 0], y_all[:, 0]])
+
+    if getattr(stack, "placement", "tc") == "span":
+        axis = np.array([e[0] for e in entries], dtype=float)
+        at = s
+    else:
+        # Legacy t/c blend: sort entries by t/c (metadata thickness, else span)
+        # and interpolate over that axis at the planform-driven tc.
+        def _tc_of(entry: tuple) -> float:
+            foil = entry[1]
+            if "thickness" in foil.metadata:
+                return float(foil.metadata["thickness"])
+            return float(entry[0])
+        order = np.argsort([_tc_of(e) for e in entries])
+        axis = np.array([_tc_of(entries[i]) for i in order], dtype=float)
+        x_all = x_all[:, order]
+        y_all = y_all[:, order]
+        at = tc
+
+    x_interp = interp1d(axis, x_all, axis=1, bounds_error=False,
                         fill_value=(x_all[:, 0], x_all[:, -1]))
-    y_interp = interp1d(tcs_arr, y_all, axis=1, bounds_error=False,
+    y_interp = interp1d(axis, y_all, axis=1, bounds_error=False,
                         fill_value=(y_all[:, 0], y_all[:, -1]))
 
-    xs = x_interp(tc)  # (n_chord,)
-    ys = y_interp(tc)
-    return np.column_stack([xs, ys])
+    return np.column_stack([x_interp(at), y_interp(at)])
 
 
 def _repanel_uacs(xy_raw: np.ndarray, n: int) -> np.ndarray:
