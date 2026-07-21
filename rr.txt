@@ -1,0 +1,6 @@
+           # Translate to twist center at 0
+            poly.translate([0,-0.5, 0], inplace=True)
+            # Scale by chord
+            poly.scale([vals["chord"][i], vals["chord"][i], 1], inplace=True)
+            # Rotate by twist around z-axis
+            poly.rotate_z(-vals["twist"][i], inplace=True)
