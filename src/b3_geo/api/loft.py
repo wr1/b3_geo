@@ -104,6 +104,13 @@ def process_loft(
         planform_plot_file = workdir / "planform.png"
         plot_planform_from_blade(blade, controls, str(planform_plot_file))
         logger.info(f"Saved planform plot to {planform_plot_file}")
+        curvature_plot_file = workdir / "airfoil_curvature.png"
+        t_min = float(blade.thickness.min())
+        t_max = float(blade.thickness.max())
+        blade.plot_airfoil_curvature(
+            np.linspace(t_min, t_max, 5), str(curvature_plot_file)
+        )
+        logger.info(f"Saved airfoil curvature plot to {curvature_plot_file}")
     # Create sections at mesh.z positions for 2D mesh
     mesh_data = config_data.get("mesh", {})
     sections_mesh = None

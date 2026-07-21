@@ -30,7 +30,7 @@ def test_loft_step(tmp_path):
     step = loft_step(str(config_file))
     assert step.workdir_key == "workdir"
     assert step.dependent_sections == ["geometry", "airfoils", "mesh", "mesh3d"]
-    assert len(step.output_files) == 2
+    assert len(step.output_files) == 3
     assert step.output_file is None
     assert step.plot is True
     assert step.force is False
@@ -38,4 +38,5 @@ def test_loft_step(tmp_path):
 
     workdir = tmp_path / "b3_geo"
     assert (workdir / "planform.png").exists()
+    assert (workdir / "airfoil_curvature.png").exists()
     assert (workdir / "lm1_mesh.vtp").exists()

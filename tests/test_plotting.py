@@ -1,6 +1,10 @@
 import numpy as np
 
-from b3_geo.utils.plotting import plot_airfoils, plot_planform
+from b3_geo.utils.plotting import (
+    plot_airfoil_curvature,
+    plot_airfoils,
+    plot_planform,
+)
 
 
 def test_plot_airfoils(tmp_path):
@@ -14,6 +18,17 @@ def test_plot_airfoils(tmp_path):
     output_file = str(tmp_path / "plot.png")
     plot_airfoils(airfoils_data, 3, output_file)
     assert (tmp_path / "plot.png").exists()
+
+
+def test_plot_airfoil_curvature(tmp_path):
+    """Test curvature plot for a set of contours."""
+    theta = np.linspace(0, 2 * np.pi, 100)
+    circle = 0.5 * np.column_stack((np.cos(theta), np.sin(theta)))
+    ellipse = np.column_stack((0.5 * np.cos(theta), 0.1 * np.sin(theta)))
+    sections = {"circle": circle, "ellipse": ellipse}
+    output_file = str(tmp_path / "curvature.png")
+    plot_airfoil_curvature(sections, output_file)
+    assert (tmp_path / "curvature.png").exists()
 
 
 def test_plot_planform(tmp_path):

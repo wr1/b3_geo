@@ -33,30 +33,51 @@ class Blade:
             data = load_airfoil(af.path)
             self.airfoils_data[af.name] = {"data": data, "thickness": af.thickness}
         # Precompute interpolation functions for airfoils
-        sorted_af = sorted(self.airfoils_data.values(), key=lambda d: d["thickness"])
+        sorted_items = sorted(
+            self.airfoils_data.items(), key=lambda kv: kv[1]["thickness"]
+        )
+        sorted_af = [d for _, d in sorted_items]
         if len(sorted_af) == 0:
             msg = "No airfoils provided"
             raise ValueError(msg)
+        self.names_sorted = [name for name, _ in sorted_items]
         self.t_sorted = np.array([d["thickness"] for d in sorted_af])
         interp_data = np.array(
             [interpolate_airfoil(d["data"], self.np_chordwise) for d in sorted_af]
         )
         x_all = interp_data[:, :, 0].T
         y_all = interp_data[:, :, 1].T
-        self.x_interp = interp1d(
-            self.t_sorted,
-            x_all,
-            axis=1,
-            bounds_error=False,
-            fill_value=(x_all[:, 0], x_all[:, -1]),
-        )
-        self.y_interp = interp1d(
-            self.t_sorted,
-            y_all,
-            axis=1,
-            bounds_error=False,
-            fill_value=(y_all[:, 0], y_all[:, -1]),
-        )
+        if len(sorted_af) == 1:
+            # interp1d needs two distinct knots; a single airfoil is constant
+            self.x_interp = self._constant_interp(x_all[:, 0])
+            self.y_interp = self._constant_interp(y_all[:, 0])
+        else:
+            self.x_interp = interp1d(
+                self.t_sorted,
+                x_all,
+                axis=1,
+                bounds_error=False,
+                fill_value=(x_all[:, 0], x_all[:, -1]),
+            )
+            self.y_interp = interp1d(
+                self.t_sorted,
+                y_all,
+                axis=1,
+                bounds_error=False,
+                fill_value=(y_all[:, 0], y_all[:, -1]),
+            )
+
+    @staticmethod
+    def _constant_interp(values: np.ndarray):
+        """Interpolator returning the same chordwise values for any thickness."""
+
+        def interp(thickness):
+            t_arr = np.asarray(thickness)
+            if t_arr.ndim == 0:
+                return values.copy()
+            return np.repeat(values[:, None], t_arr.size, axis=1)
+
+        return interp
 
     def _interpolate_planform(self):
         """Interpolate planform parameters along the span."""
@@ -123,7 +144,7 @@ class Blade:
         _fig, ax = plt.subplots(figsize=(10, 8))
         for t in thicknesses:
             xy = self.get_airfoil_xy_norm(t)
-            ax.plot(xy[:, 0], xy[:, 1], label=f"Thickness {t:.2f}")
+            ax.plot(xy[:, 0], xy[:, 1], label=f"t/c = {t:.2f} — {self.blend_info(t)}")
         ax.set_title("Interpolated Airfoils")
         ax.set_xlabel("x/chord")
         ax.set_ylabel("y/chord")
@@ -131,6 +152,88 @@ class Blade:
         ax.set_aspect("equal")
         plt.savefig(output_file)
         plt.close()
+
+    def blend_info(self, thickness: float) -> str:
+        """Describe how the airfoil at this thickness is blended from the inputs."""
+        ts = self.t_sorted
+        names = self.names_sorted
+        knot = np.isclose(ts, thickness, rtol=0, atol=1e-6)
+        if knot.any():
+            return f"{names[int(np.argmax(knot))]} (input)"
+        if thickness < ts[0]:
+            return f"{names[0]} (clamped below t/c = {ts[0]:.2f})"
+        if thickness > ts[-1]:
+            return f"{names[-1]} (clamped above t/c = {ts[-1]:.2f})"
+        i = int(np.searchsorted(ts, thickness))
+        w = (thickness - ts[i - 1]) / (ts[i] - ts[i - 1])
+        return f"{100 * (1 - w):.0f}% {names[i - 1]} + {100 * w:.0f}% {names[i]}"
+
+    def _bracketing_airfoils(self, thickness: float) -> list[tuple[str, float]]:
+        """Input airfoils (name, thickness) bracketing an interpolated thickness.
+
+        Empty when the thickness coincides with an input airfoil or is clamped.
+        """
+        ts = self.t_sorted
+        if np.isclose(ts, thickness, rtol=0, atol=1e-6).any():
+            return []
+        if thickness < ts[0] or thickness > ts[-1]:
+            return []
+        i = int(np.searchsorted(ts, thickness))
+        return [
+            (self.names_sorted[i - 1], float(ts[i - 1])),
+            (self.names_sorted[i], float(ts[i])),
+        ]
+
+    def get_te_thickness(self, thickness: float | np.ndarray) -> float | np.ndarray:
+        """Trailing-edge gap (chord fraction) of interpolated airfoil(s).
+
+        Distance between the first and last contour points (Selig convention:
+        the contour starts and ends at the trailing edge).
+        """
+        xy = self.get_airfoil_xy_norm(thickness)
+        gap = np.linalg.norm(xy[0] - xy[-1], axis=-1)
+        if np.isscalar(thickness):
+            return float(gap)
+        return gap
+
+    def plot_te_thickness(self, output_file: str, n_sweep: int = 200):
+        """Plot trailing-edge thickness vs relative thickness of the blend."""
+        from b3_geo.utils.plotting import plot_te_thickness
+
+        t_sweep = np.linspace(self.t_sorted[0], self.t_sorted[-1], n_sweep)
+        inputs = {
+            name: (float(t), float(self.get_te_thickness(float(t))))
+            for name, t in zip(self.names_sorted, self.t_sorted)
+        }
+        # Zoom on the lower cluster when the thickest input sits far above it
+        zoom_tc = None
+        if len(self.t_sorted) >= 3 and self.t_sorted[-1] > 1.5 * self.t_sorted[-2]:
+            zoom_tc = 1.2 * float(self.t_sorted[-2])
+        plot_te_thickness(
+            t_sweep, self.get_te_thickness(t_sweep), inputs, output_file, zoom_tc
+        )
+
+    def plot_airfoil_curvature(
+        self, thicknesses: np.ndarray, output_file: str, max_tooth: float = 0.15
+    ):
+        """Plot curvature of interpolated airfoils at given thicknesses."""
+        from b3_geo.utils.plotting import plot_airfoil_curvature
+
+        sections = {}
+        references = {}
+        for t in thicknesses:
+            t = float(t)
+            label = f"t/c = {t:.2f} — {self.blend_info(t)}"
+            sections[label] = self.get_airfoil_xy_norm(t)
+            parents = self._bracketing_airfoils(t)
+            if parents:
+                references[label] = {
+                    f"{name} (t/c = {tk:.2f})": self.get_airfoil_xy_norm(tk)
+                    for name, tk in parents
+                }
+        plot_airfoil_curvature(
+            sections, output_file, max_tooth=max_tooth, references=references
+        )
 
     def get_sections(self, rels: np.ndarray) -> np.ndarray:
         """Compute positioned and rotated airfoil sections at given relative spans using PyVista operations."""
