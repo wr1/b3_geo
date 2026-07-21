@@ -1,18 +1,10 @@
+# b3_geo
 
-# b3-geo
+3D blade geometry evaluator: planform + airfoil stack → the **W vtk** — one
+closed polyline per span section, carrying the UACS / SDACS / GBCS coordinate
+frames and section fields every downstream package reads.
 
-Blade geometry module for b3m, handling airfoil interpolation and lofting.
-
-## Installation
-
-```bash
-pip install -e .
-```
-
-## Usage
-
-```bash
-b3-geo af config.yml
-b3-geo loft config.yml
-b3-geo clean config.yml
-```
+- Entry point: `build_w_vtk(planform, airfoil_stack, ...)`
+- Docs: `packages/b3_geo/` pages in the documentation site
+  (`master_docs/src/content/docs/packages/b3_geo/`)
+- Internal audit notes: `docs/b3_geo_audit.md`
